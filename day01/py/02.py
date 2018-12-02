@@ -18,4 +18,4 @@ def duplicate_freq(input_file):
                 dups.add(freq)
 
 
-print(duplicate_freq('./day01-input.txt'))
+print(duplicate_freq('../day01-input.txt'))

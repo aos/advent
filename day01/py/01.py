@@ -13,4 +13,4 @@ def total_freq(input_file):
     return total
 
 
-print(total_freq('./day01-input.txt'))
+print(total_freq('../day01-input.txt'))
