@@ -38,7 +38,18 @@ def get_correct(arr):
     return common
 
 
-print(get_correct(ALL_IDS))
+def corr_two(arr):
+    d = set()
+    for s in arr:
+        for i in range(len(s)):
+            new_str = s[:i] + '_' + s[i+1:]
+            if new_str in d:
+                result = ''.join([n for n in new_str if n != '_'])
+                return result
+            d.add(new_str)
+
+
+print(corr_two(ALL_IDS))
 
 # Test example
 tests = [
