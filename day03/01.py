@@ -8,6 +8,10 @@ def build_fabric(w, h):
     return [[0 for x in range(w)] for y in range(h)]
 
 
+def split_query(q):
+    return re.match(r'^(#\d+)\D+(\d+,\d+)\D+(\d+x\d+)$', q).groups()
+
+
 def populate(query, fabric):
     claim_id, start_point, dimensions = split_query(query)
 
@@ -19,15 +23,11 @@ def populate(query, fabric):
             fabric[i][j] += 1
 
 
-def split_query(q):
-    return re.match(r'^(#\d+)\D+(\d+,\d+)\D+(\d+x\d+)$', q).groups()
-
-
 def intersecting(fabric):
     claims = 0
-    for col in fabric:
-        for row in col:
-            if row > 1:
+    for row in fabric:
+        for cell in row:
+            if cell > 1:
                 claims += 1
 
     return claims
@@ -37,12 +37,12 @@ with open('./day03-input.txt') as f:
     FABRIC = build_fabric(1000, 1000)
 
     for line in f:
-        populate(line, FABRIC)
+        populate(line.strip(), FABRIC)
 
     res = intersecting(FABRIC)
     print(res)
 
-# Tests
+# Test
 test_input = [
     '#1 @ 1,3: 4x4',
     '#2 @ 3,1: 4x4',
