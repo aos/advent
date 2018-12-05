@@ -27,10 +27,9 @@ def _create_calendar(inp):
     for dt, action in inp:
         # Guard begins shift, let's grab the ID
         if '#' in action:
-            i = re.search(r'(#\d+)', action).group(1)
-            current_guard = i
-            if i not in table:
-                table[i] = [0 for i in range(60)]
+            current_guard = re.search(r'(#\d+)', action).group(1)
+            if current_guard not in table:
+                table[current_guard] = [0 for i in range(60)]
             continue
 
         # Guard falls asleep, keep track of when they did
@@ -87,6 +86,7 @@ def solve(f):
 
 
 print(solve('./day04-input.txt'))
+
 # Tests
 test_input = _sort_input('./day04-example.txt')
 cal = _create_calendar(test_input)
