@@ -3,6 +3,8 @@
 
 
 # The ugly solution (slicing the array everytime a match happens)
+# Run through string, for each match: slice out the match
+# Runtime: O(StringLength^2 * Number of matches)
 def alchemy(string):
     i = 0
     to_arr = [c for c in string]
@@ -24,11 +26,12 @@ def alchemy(string):
     return len(to_arr)
 
 
-with open('./day05-input.txt') as f:
-    print(alchemy((f.read().rstrip())))
+if __name__ == '__main__':
+    with open('./day05-input.txt') as f:
+        print(alchemy((f.read().rstrip())))
 
-test_input = 'dabAcCaCBAcCcaDA'
-test_input_two = 'dDabAcCaCBAcCcaDA'
-assert(alchemy(test_input) == 10)
-assert(alchemy(test_input_two) == 9)
-print('All tests passed!')
+    test_input = 'dabAcCaCBAcCcaDA'
+    test_input_two = 'dDabAcCaCBAcCcaDA'
+    assert(alchemy(test_input) == 10)
+    assert(alchemy(test_input_two) == 9)
+    print('All tests passed!')

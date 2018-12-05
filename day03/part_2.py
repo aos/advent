@@ -1,7 +1,8 @@
 # Day 3 - Puzzle 2
 # ID of the only claim that does not overlap
 
-import re
+
+from part_1 import split_query
 import collections
 
 
@@ -10,8 +11,7 @@ def build_fabric(w, h):
 
 
 def populate(query, claims, fabric):
-    claim_id, start_point, dimensions = \
-        re.match(r'^(#\d+)\D+(\d+,\d+)\D+(\d+x\d+)$', query).groups()
+    claim_id, start_point, dimensions = split_query(query)
 
     claims[claim_id] = True
 
