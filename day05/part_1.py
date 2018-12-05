@@ -7,14 +7,13 @@
 # Runtime: O(StringLength^2 * Number of matches)
 def alchemy(string):
     i = 0
-    to_arr = [c for c in string]
 
-    while i < len(to_arr):
-        first = to_arr[i]
+    while i < len(string):
+        first = string[i]
         try:
-            second = to_arr[i+1]
+            second = string[i+1]
             if abs(ord(first) - ord(second)) == 32:
-                to_arr = to_arr[0:i] + to_arr[i+2:]
+                string = string[0:i] + string[i+2:]
                 i -= 1
                 if i == -1:
                     i = 0
@@ -23,7 +22,7 @@ def alchemy(string):
             pass
         i += 1
 
-    return len(to_arr)
+    return len(string)
 
 
 if __name__ == '__main__':
