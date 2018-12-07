@@ -9,18 +9,44 @@ def largest_area(inp_arr):
     areas = collections.defaultdict(int)
     max_x, max_y = _grid_size(inp_arr)
     grid = _generate_grid(max_x, max_y)
-    pass
+    populated = _populate_grid(inp_arr, grid, max_x, max_y)
+
+    for y, row in enumerate(populated):
+        for x, cell in enumerate(row):
+            if len(cell) == 1:
+                areas[cell[0]] += 1
+
+    borders = {}
+    for y, row in enumerate(populated):
+        for x, cell in enumerate(row):
+            if len(cell) == 1:
+                if x == 0 or y == 0 or x == max_x or y == max_y:
+                    borders[cell[0]] = True
+
+    return max({k: areas[k] for k in (set(areas) - set(borders))}.values())
 
 
-def _add_points(grid, inp):
-    for x, y in inp:
-        grid[y][x] = (x, y)
+def _populate_grid(inp_arr, grid, max_x, max_y):
+    for y in range(max_y + 1):
+        for x in range(max_x + 1):
+            # Calculate manhattan distance for each cell to the input_array
+            # And use the one with the minimum distance
+            min_point = None
+            m = 1e9
+            for point in inp_arr:
+                d = _d_manh((x, y), point)
+                if d < m:
+                    m = d
+                    min_point = point
+                    grid[y][x] = [min_point]
+                elif d == m:
+                    grid[y][x].append(point)
 
     return grid
 
 
 def _generate_grid(x, y):
-    return [[None for i in range(x + 1)] for i in range(y + 1)]
+    return [[[] for i in range(x + 1)] for i in range(y + 1)]
 
 
 def _grid_size(inp):
@@ -63,8 +89,11 @@ test_input = [
 ]
 assert(_d_manh(test_input[0], test_input[1]) == 5)
 assert(_grid_size(test_input) == (8, 9))
-import pprint
-pp = pprint.PrettyPrinter()
-pp.pprint(_add_points(_generate_grid(*_grid_size(test_input)), test_input))
-#assert(determine(test_input == 17))
+assert(largest_area(test_input) == 17)
 print('All tests passed!')
+
+with open('./day06-input.txt') as f:
+    a = [tuple(int(i)
+               for i in line.strip().split(','))
+         for line in f]
+    print(largest_area(a))
