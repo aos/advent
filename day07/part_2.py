@@ -63,7 +63,7 @@ print('All tests passed!')
 
 # Solution
 STEP_LENGTH = 60
-NUM_WORKERS = 15
+NUM_WORKERS = 5
 TIME_CONTROL = {c: i + 1 + STEP_LENGTH for i, c in enumerate(ascii_uppercase)}
 
 with open('./day07-input.txt') as f:
