@@ -78,8 +78,7 @@ def _d_manh(p_1, p_2):
     return abs(x_1 - x_2) + abs(y_1 - y_2)
 
 
-# Tests
-test_input = [
+TEST_INPUT = [
     (1, 1),
     (1, 6),
     (8, 3),
@@ -87,13 +86,14 @@ test_input = [
     (5, 5),
     (8, 9)
 ]
-assert(_d_manh(test_input[0], test_input[1]) == 5)
-assert(_grid_size(test_input) == (8, 9))
-assert(largest_area(test_input) == 17)
-print('All tests passed!')
 
-with open('./day06-input.txt') as f:
-    a = [tuple(int(i)
-               for i in line.strip().split(','))
-         for line in f]
-    print(largest_area(a))
+if __name__ == '__main__':
+    # Tests
+    assert(_d_manh(TEST_INPUT[0], TEST_INPUT[1]) == 5)
+    assert(_grid_size(TEST_INPUT) == (8, 9))
+    assert(largest_area(TEST_INPUT) == 17)
+    print('All tests passed!')
+
+    with open('./day06-input.txt') as f:
+        a = [tuple(int(i) for i in line.strip().split(',')) for line in f]
+        print(largest_area(a))
