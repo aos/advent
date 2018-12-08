@@ -8,7 +8,8 @@ import heapq
 
 
 # Using a modified Kahn's algorithm for topological sorting
-# The min-heap will lexographically insert items with priority: 'A' > 'H' > 'Z'
+# The min-heap will lexicographically insert items with priority:
+# 'A' > 'H' > 'Z'
 def tops(input_arr):
     G, indegree = _generate_graph(input_arr)
     visited = collections.defaultdict(bool)
@@ -40,7 +41,6 @@ def tops(input_arr):
 def _generate_graph(input_arr):
     G = collections.defaultdict(list)
     indegree = collections.defaultdict(int)
-    outdegree = collections.defaultdict(int)
 
     for inp in input_arr:
         head, tail = re.search(
@@ -49,12 +49,10 @@ def _generate_graph(input_arr):
         ).groups()
         G[head].append(tail)
 
-        outdegree[head] += 1
         indegree[tail] += 1
 
         if tail not in G:
             G[tail] = []
-            outdegree[tail] = 0
 
         if head not in indegree:
             indegree[head] = 0
@@ -62,7 +60,6 @@ def _generate_graph(input_arr):
     return G, indegree
 
 
-# Tests
 TEST_INPUT = [
     'Step C must be finished before step A can begin.',
     'Step C must be finished before step F can begin.',
@@ -72,19 +69,21 @@ TEST_INPUT = [
     'Step D must be finished before step E can begin.',
     'Step F must be finished before step E can begin.',
 ]
-G, ind = _generate_graph(TEST_INPUT)
-assert(G == {
-    'C': ['A', 'F'],
-    'A': ['B', 'D'],
-    'F': ['E'],
-    'B': ['E'],
-    'D': ['E'],
-    'E': []
-})
-assert(ind == {'C': 0, 'A': 1, 'F': 1, 'B': 1, 'D': 1, 'E': 3})
-assert(tops(TEST_INPUT) == 'CABDFE')
-print('All tests passed!')
+if __name__ == '__main__':
+    # Tests
+    G, ind = _generate_graph(TEST_INPUT)
+    assert(G == {
+        'C': ['A', 'F'],
+        'A': ['B', 'D'],
+        'F': ['E'],
+        'B': ['E'],
+        'D': ['E'],
+        'E': []
+    })
+    assert(ind == {'C': 0, 'A': 1, 'F': 1, 'B': 1, 'D': 1, 'E': 3})
+    assert(tops(TEST_INPUT) == 'CABDFE')
+    print('All tests passed!')
 
-with open('./day07-input.txt') as f:
-    a = [l.rstrip() for l in f]
-    print(tops(a))
+    with open('./day07-input.txt') as f:
+        a = [l.rstrip() for l in f]
+        print(tops(a))
