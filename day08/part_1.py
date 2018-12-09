@@ -1,5 +1,5 @@
 # Day 8 - Puzzle 1
-# What is the sum of all metadata entries
+# What is the sum of all metadata entries?
 
 
 class Node:
