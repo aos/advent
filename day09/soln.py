@@ -8,7 +8,7 @@ import re
 
 def marbles(string):
     num_players, last_marble = _parse(string)
-    players = collections.defaultdict(int)
+    players = [0 for i in range(num_players)]
     # Initialize the circle with marble 0 and 1
     circle = collections.deque([0])
     curr_player = 1
@@ -27,7 +27,7 @@ def marbles(string):
         curr_marble += 1
         curr_player = (curr_player + 1) % num_players
 
-    return max(players.values())
+    return max(players)
 
 
 def _parse(string):
