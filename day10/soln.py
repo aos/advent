@@ -23,13 +23,13 @@ def plotted(inp_arr):
     fig, ax = plt.subplots()
     xs, ys = list(zip(*positions))
 
-    while steps < 10850:
+    while steps < 10880:
         vel_xs, vel_ys = zip(*velocities)
         xs = list(map(sum, zip(xs, vel_xs)))
         ys = list(map(sum, zip(ys, vel_ys)))
         steps += 1
 
-    sc = ax.scatter(xs, ys)
+    ax.scatter(xs, ys)
 
     def animate(i):
         nonlocal xs
@@ -43,14 +43,15 @@ def plotted(inp_arr):
         xs = list(map(sum, zip(xs, vel_xs)))
         ys = list(map(sum, zip(ys, vel_ys)))
         ax.clear()
+        ax.invert_yaxis()
         ax.scatter(xs, ys)
 
     ani = matplotlib.animation.FuncAnimation(fig, animate,
-                                             interval=1000,
-                                             repeat=True)
+                                             interval=1000, repeat=True)
     plt.show()
 
 
+# Using just print console
 def test_stars(inp_arr):
     import pprint
     pp = pprint.PrettyPrinter(width=160, compact=True)
