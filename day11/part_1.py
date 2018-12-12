@@ -19,7 +19,7 @@ def charge(sn):
 
     sum_grid = _create_sum_grid(grid)
 
-    br_x, br_y = _calc_sub_matrix(sum_grid, K)
+    br_x, br_y, _ = _calc_sub_matrix(sum_grid, K)
     tl_x = br_x - K + 1
     tl_y = br_y - K + 1
     return tl_x + 1, tl_y + 1
@@ -47,11 +47,11 @@ def _calc_sub_matrix(sum_grid, k):
                 ys = y
 
     # Return bottom-right coordinates
-    return xs, ys
+    return xs, ys, max_sum
 
 
 def _create_sum_grid(grid):
-    sum_grid = _create_grid(WIDTH, HEIGHT)
+    sum_grid = _create_grid(len(grid), len(grid))
 
     # Initialize
     sum_grid[0][0] = grid[0][0]
@@ -88,24 +88,25 @@ def _find_level(x, y, sn):
     return ((power // 100) % 10) - 5
 
 
-# Tests
-TEST_POWER_LEVELS = {
-    (3, 5, 8): 4,
-    (122, 79, 57): -5,
-    (217, 196, 39): 0,
-    (101, 153, 71): 4
-}
-for k, v in TEST_POWER_LEVELS.items():
-    assert(_find_level(*k) == v)
-
-TEST_GRIDS = {
-    18: (33, 45),
-    42: (21, 61)
-}
-for k, v in TEST_GRIDS.items():
-    assert(charge(k) == v)
-print('All tests passed!')
-
-# Solution
 PUZZLE_INPUT = 2187
-print(charge(PUZZLE_INPUT))
+if __name__ == '__main__':
+    # Tests
+    TEST_POWER_LEVELS = {
+        (3, 5, 8): 4,
+        (122, 79, 57): -5,
+        (217, 196, 39): 0,
+        (101, 153, 71): 4
+    }
+    for k, v in TEST_POWER_LEVELS.items():
+        assert(_find_level(*k) == v)
+
+    TEST_GRIDS = {
+        18: (33, 45),
+        42: (21, 61)
+    }
+    for k, v in TEST_GRIDS.items():
+        assert(charge(k) == v)
+    print('All tests passed!')
+
+    # Solution
+    print(charge(PUZZLE_INPUT))
