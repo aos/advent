@@ -1,111 +1,48 @@
 # Day 13 - Puzzle 1
 # What is the location of the first crash?
 
-
+from enum import Enum
 from pprint import pprint
 import collections
 
 
-def run(file):
-    steps = 0
-    layout = _create_layout(file)
-    locations = _store_carts(layout)
-
-    # Go on forever... or until a crash happens
-    while steps < 1:
-        for y, row in enumerate(layout):
-            cart = ''
-            prev_tile = ''
-            for x, cell in enumerate(row):
-                loc = '{},{}'.format(x, y)
-                if cell == '-' or cell == '|' or cell == '\\' or cell == '/':
-                    if cart:
-                        layout[y][x] = cart
-                        cart = ''
-                    else:
-                        prev_tile = cell
-
-                else:
-                    d, new_x, new_y = _find_coords(layout, cell, x, y)
-                    next_step = layout[new_y][new_x]
-                    new_loc = '{},{}'.format(new_x, new_y)
-
-                    if next_step == '+':
-                        pass
-                    else:
-                        new_d = _step_forward(layout, d, new_x, new_y)
-                        cart = new_d
-                        layout[y][x] = prev_tile
-
-                        # Crash detected
-                        if new_loc in locations:
-                            return new_x, new_y
-                        locations[new_loc] = locations[loc]
-                        del locations[loc]
-
-        steps += 1
-
-    return layout
+class CartKind(Enum):
+    UP = '^'
+    DOWN = 'v'
+    LEFT = '<'
+    RIGHT = '>'
 
 
-def _step_forward(layout, direction, x, y):
-    steps = {
-        '-': {
-            '+': '>',
-            '-': '<'
-        },
-        '|': {
-            '+': '^',
-            '-': 'v'
-        },
-        '\\': {
-            '>': 'v',
-            '^': '<',
-            '<': '^',
-            'v': '>'
-        },
-        '/': {
-            '>': '^',
-            '^': '>',
-            '<': 'v',
-            'v': '<'
-        }
-    }
-    next_step = layout[y][x]
-    return steps[next_step][direction]
+class TrackKind(Enum):
+    NS = '|'
+    EW = '-'
+    NE_SW = '\\'
+    NW_SE = '/'
+    XROADS = '+'
 
 
-def _find_coords(layout, d, x, y):
-    direction = ''
-    if d == '>':
-        x += 1
-        direction = '+'
-    elif d == '<':
-        x -= 1
-        direction = '-'
-    elif d == 'v':
-        y += 1
-        direction = '+'
-    else:
-        y -= 1
-        direction = '-'
+def _tick(carts, grid):
+    while True:
+        carts = sorted(carts, key=lambda x: x['location'])
+        for cart in carts:
+            cart_x, cart_y = cart['location']
+            cart_type = cart['type']
+            cart_dir = cart['direction']
 
-    return direction, x, y
+            if cart_type == CartKind.LEFT:
+                cart_x -= 1
+            elif cart_type == CartKind.RIGHT:
+                cart_x -= 1
+            elif cart_type == CartKind.UP:
+                cart_y -= 1
+            elif cart_type == CartKind.DOWN:
+                cart_y += 1
 
-
-def _store_carts(grid):
-    store = collections.defaultdict(int)
-    carts = ['>', '<', 'v', '^']
-
-    for y, row in enumerate(grid):
-        for x, cell in enumerate(row):
-            if cell in carts:
-                store['{},{}'.format(x, y)] = 0
-
-    return store
+            cart['location'] = (cart_x, cart_y)
 
 
-def _create_layout(file):
+def _create_state(file):
+    carts = []
     grid = []
     with open(file) as f:
         for line in f:
@@ -113,13 +50,37 @@ def _create_layout(file):
             row.extend([i for i in line.strip('\n')])
             grid.append(row)
 
-    return grid
+    for y, row in enumerate(grid):
+        for x, cell in enumerate(row):
+            if cell in '^v<>':
+                if (
+                    CartKind(cell) == CartKind.UP or
+                    CartKind(cell) == CartKind.DOWN
+                ):
+                    grid[y][x] = TrackKind.NS
+                elif (
+                    CartKind(cell) == CartKind.LEFT or
+                    CartKind(cell) == CartKind.RIGHT
+                ):
+                    grid[y][x] = TrackKind.EW
+
+                cart_state = {
+                    'location': (x, y),
+                    'type': CartKind(cell),
+                    'direction': 0
+                }
+                carts.append(cart_state)
+            elif cell in '|-\\/+':
+                grid[y][x] = TrackKind(cell)
+
+    return carts, grid
 
 
 # Tests
-TEST_LAYOUT = _create_layout('./example-in.txt')
-TEST_STORE = _store_carts(TEST_LAYOUT)
-assert(TEST_STORE == {'2,0': 0, '9,3': 0})
+TEST_CARTS, TEST_GRID = _create_state('./example-in.txt')
+assert(TEST_CARTS == [
+    {'location': (2, 0), 'type': CartKind.RIGHT, 'direction': 0},
+    {'location': (9, 3), 'type': CartKind.DOWN, 'direction': 0}
+])
+print(_sort_carts(TEST_CARTS))
 print('All tests passed!')
-
-print(run('./example-in.txt'))
