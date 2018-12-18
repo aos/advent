@@ -1,22 +1,8 @@
-# Day 13 - Puzzle 1
-# What is the location of the first crash?
+# Day 13 - Puzzle 2
+# What is the location of the last cart at the end of the first tick where it
+# is the only cart left?
 
-from enum import Enum
-
-
-class CartKind(Enum):
-    UP = '^'
-    DOWN = 'v'
-    LEFT = '<'
-    RIGHT = '>'
-
-
-class TrackKind(Enum):
-    NS = '|'
-    EW = '-'
-    NE_SW = '\\'
-    NW_SE = '/'
-    XR = '+'
+from part_1 import CartKind, TrackKind
 
 
 def _tick(carts, grid):
@@ -45,7 +31,14 @@ def _tick(carts, grid):
     xr_directions = [CartKind.UP, CartKind.RIGHT, CartKind.DOWN, CartKind.LEFT]
     steps = 0
     while True:
-        carts = sorted(carts, key=lambda x: x['location'])
+        carts = sorted(
+            [c for c in carts if not c['crashed']],
+            key=lambda x: x['location']
+        )
+
+        if len(carts) == 1:
+            return carts[0]['location']
+
         for cart in carts:
             cart_x, cart_y = cart['location']
             cart_type = cart['type']
@@ -59,13 +52,16 @@ def _tick(carts, grid):
                 cart_y -= 1
             elif cart_type == CartKind.DOWN:
                 cart_y += 1
+            cart['location'] = (cart_x, cart_y)
 
             for c in carts:
-                if c['location'] == (cart_x, cart_y):
-                    print('Number of steps taken:', steps)
-                    return cart_x, cart_y
-
-            cart['location'] = (cart_x, cart_y)
+                if (
+                    not c['crashed'] and
+                    cart['location'] == c['location'] and
+                    cart is not c
+                ):
+                    cart['crashed'] = True
+                    c['crashed'] = True
 
             grid_loc_kind = TrackKind(grid[cart_y][cart_x])
             if grid_loc_kind == TrackKind.XR:
@@ -83,6 +79,7 @@ def _tick(carts, grid):
                 cart['type'] = types[grid_loc_kind][cart_type]
 
         steps += 1
+    return carts
 
 
 def _create_state(file):
@@ -111,7 +108,8 @@ def _create_state(file):
                 cart_state = {
                     'location': (x, y),
                     'type': CartKind(cell),
-                    'direction': 0
+                    'direction': 0,
+                    'crashed': False
                 }
                 carts.append(cart_state)
             elif cell in '|-\\/+':
@@ -120,16 +118,10 @@ def _create_state(file):
     return carts, grid
 
 
-if __name__ == '__main__':
-    # Tests
-    TEST_CARTS, TEST_GRID = _create_state('./example-in.txt')
-    assert(TEST_CARTS == [
-        {'location': (2, 0), 'type': CartKind.RIGHT, 'direction': 0},
-        {'location': (9, 3), 'type': CartKind.DOWN, 'direction': 0}
-    ])
-    assert(_tick(TEST_CARTS, TEST_GRID) == (7, 3))
-    print('All tests passed!')
+# Test
+TEST_CARTS, TEST_GRID = _create_state('./example-2.txt')
+assert(_tick(TEST_CARTS, TEST_GRID) == (6, 4))
 
-    # Solution
-    CARTS, GRID = _create_state('./day13-input.txt')
-    print(_tick(CARTS, GRID))
+# Solution
+CARTS, GRID = _create_state('./day13-input.txt')
+print(_tick(CARTS, GRID))
