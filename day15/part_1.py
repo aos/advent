@@ -16,6 +16,52 @@
 
 
 from pprint import pprint
+from heapq import heappush, heappop
+
+
+def add_pts(pt1, pt2):
+    return tuple(sum(item) for item in zip(pt1, pt2))
+
+
+def m_dist(pt1, pt2):
+    return abs(pt1[0] - pt2[0]) + abs(pt1[1] - pt2[1])
+
+
+def bfs(source, targets, m):
+    reachable = []
+
+    for i in targets:
+        dists = [0]
+        q = [source]
+        visited = set()
+        d = -1
+
+        while q:
+            nxt = q.pop(0)
+            dist = dists.pop(0)
+            if nxt == i:
+                reachable.append((dist, nxt))
+                continue
+            visited.add(nxt)
+            d += 1
+            for neighbor in neighbors(nxt):
+                if (
+                    neighbor not in visited and
+                    m[neighbor[1]][neighbor[0]] == '.' and
+                    neighbor not in q
+                ):
+                    q.append(neighbor)
+                    dists.append(d+dist)
+
+    return sorted(reachable, key=lambda p: (p[0], p[1][1], p[1][0]))
+
+
+def neighbors(pt):
+    U, D, L, R = (0, -1), (0, 1), (-1, 0), (1, 0)
+    return sorted(
+        [add_pts(a, pt) for a in (U, D, L, R)],
+        key=lambda p: (p[1], p[0])
+    )
 
 
 class Unit:
@@ -31,39 +77,34 @@ class Unit:
         return f'{self.u_type}'
 
     def __repr__(self):
-        return f'Unit({self.u_type}, {self.x}, {self.y}, {self.hp})'
+        return f'{self.u_type}({self.hp})'
 
-    def step(self, new_x, new_y):
+    def step(self, new_x, new_y, m):
+        m[self.y][self.x] = '.'
         self.x = new_x
         self.y = new_y
+        m[self.y][self.x] = self
+        return new_x, new_y
 
-    def find_targets(self, others):
-        targets = []
-        for t in others:
-            if t is self:
-                continue
-            if t.u_type != self.u_type and t.alive:
-                targets.append(t)
+    def adj_sqs(self):
+        return neighbors((self.x, self.y))
 
-        return targets
+    def adj_empty_sqs(self, m):
+        return [(p[0], p[1]) for p in self.adj_sqs() if m[p[1]][p[0]] == '.']
 
-    def adjacent_squares(self, m):
-        adjacent = []
-        U, D, L, R = (0, -1), (0, 1), (-1, 0), (1, 0)
-        for d in (U, D, L, R):
-            dir_x, dir_y = (sum(i) for i in zip((self.x, self.y), d))
-            if (
-                dir_x < 0 or
-                dir_y < 0 or
-                dir_x >= len(m[0]) or
-                dir_y >= len(m)
-            ):
-                continue
+    def find_enemies(self, sqs):
+        return [u for u in sqs if (
+            type(u) == Unit and
+            u.u_type != self.u_type and
+            u.alive
+        )]
 
-            if m[dir_y][dir_x] == '.':
-                adjacent.append((dir_x, dir_y))
-
-        return adjacent
+    def get_attacked(self, ap):
+        self.hp -= ap
+        if self.hp <= 0:
+            self.alive = False
+            return True
+        return False
 
 
 class Map:
@@ -86,103 +127,94 @@ class Map:
                         self.map[y][x] = '.'
 
     def print(self):
-        print('\n'.join(''.join(str(x) for x in row) for row in self.map))
+        print('\n'.join(''.join(str(u) for u in row) for row in self.map))
 
-    def rounds(self, rounds):
+    def rounds(self):
         rnd = 0
 
-        while rnd < rounds:
-            self.units = self._sort_pts(self.units, key=lambda u: (u.y, u.x))
+        while True:
+            # Queue unit action
+            self.units = sorted(self._clean_units(), key=lambda u: (u.y, u.x))
+            for unit in self.units:
+                if not unit.alive:
+                    continue
 
-            for u in self.units:
-                nearest = []
-                targets = u.find_targets(self.units)
+                if not unit.find_enemies(self.units):
+                    return rnd * sum(map(lambda u: u.hp, self.units))
 
-                for t in targets:
-                    adj_sqs = t.adjacent_squares(self.map)
-                    nearest.extend(self._sort_pts(
-                        self._find_nearest(u, adj_sqs)
-                    ))
+                # Check for adjacent enemies and attack if one
+                if self._check_enemies_attack(unit):
+                    self.units = self._clean_units()
+                    continue
 
-                # Take step towards nearest chosen square
-                #breakpoint()
-                if len(nearest) > 0:
-                    sq = nearest[0]
-                    first = self._valid_dirs((u.x, u.y), sq)[0]
-                    step_x, step_y = self._add_pts(first, (u.x, u.y))
-                    self.map[u.y][u.x] = '.'
-                    u.step(step_x, step_y)
-                    self.map[step_y][step_x] = u
+                # Otherwise move
+                all_e = unit.find_enemies(self.units)
+                in_range = []
+                for e in all_e:
+                    in_range.extend(e.adj_empty_sqs(self.map))
+                nearest = self._find_nearest(unit, in_range)
+                if nearest:
+                    all_bfs = bfs(
+                        nearest[0][1],
+                        unit.adj_empty_sqs(self.map),
+                        self.map
+                    )
+                    n_x, n_y = all_bfs[0][1]
+                    unit.step(n_x, n_y, self.map)
+
+                self._check_enemies_attack(unit)
+                self.units = self._clean_units()
 
             rnd += 1
+            #print('Round:', rnd)
+            #self.print()
+            #print()
+            #print()
+            #print('\n'.join([repr(u) for u in self.units]))
 
-    def _find_nearest(self, unit, adjacents):
-        reachable = []
-        min_distance = 1e10
-        for square in adjacents:
-            if self._reach((unit.x, unit.y), square):
-                dist = self._m_dist(square, (unit.x, unit.y))
-                if dist <= min_distance:
-                    min_distance = dist
-                    reachable.append(square)
+    def _get_map_sqs(self, sqs):
+        return [self.map[s[1]][s[0]] for s in sqs]
 
-        return [s for s in reachable
-                if self._m_dist((unit.x, unit.y), s) <= min_distance]
-
-    def _reach(self, start, end):
-        if start == end:
+    def _check_enemies_attack(self, unit):
+        adjacent_enemies = sorted(
+            unit.find_enemies(self._get_map_sqs(unit.adj_sqs())),
+            key=lambda u: (u.hp, u.y, u.x)
+        )
+        if adjacent_enemies:
+            curr_enemy = adjacent_enemies[0]
+            if curr_enemy.get_attacked(unit.ap):
+                self.map[curr_enemy.y][curr_enemy.x] = '.'
             return True
-
-        valid_dirs = self._valid_dirs(start, end)
-        for i in valid_dirs:
-            new_x, new_y = self._add_pts(start, i)
-            if (
-                new_x < 0 and
-                new_y < 0 and
-                new_x >= len(self.map[0]) and
-                new_y >= len(self.map)
-            ):
-                continue
-
-            if self.map[new_y][new_x] == '.':
-                return self._reach((new_x, new_y), end)
 
         return False
 
-    def _valid_dirs(self, start, end):
-        U, D, L, R = (0, -1), (0, 1), (-1, 0), (1, 0)
-        valid_dirs = []
-        start_x, start_y = start
-        end_x, end_y = end
-        diff_x = end_x - start_x
-        diff_y = end_y - start_y
+    def _find_nearest(self, unit, sqs_in_range):
+        return bfs((unit.x, unit.y), sqs_in_range, self.map)
 
-        if diff_x < 0:
-            valid_dirs.append(L)
-        elif diff_x > 0:
-            valid_dirs.append(R)
-
-        if diff_y < 0:
-            valid_dirs.append(U)
-        elif diff_y > 0:
-            valid_dirs.append(D)
-
-        return valid_dirs
-
-    def _m_dist(self, p_1, p_2):
-        x_1, y_1 = p_1
-        x_2, y_2 = p_2
-        return abs(x_1 - x_2) + abs(y_1 - y_2)
-
-    def _sort_pts(self, pts, key=lambda pt: (pt[1], pt[0])):
-        return sorted(pts, key=key)
-
-    def _add_pts(self, pt1, pt2):
-        return (sum(item) for item in zip(pt1, pt2))
+    def _clean_units(self):
+        return [u for u in self.units if u.alive]
 
 
-m = Map('./example-move.txt')
-m.print()
-m.rounds(1)
-print()
-m.print()
+# Tests
+ex1 = Map('./examples/example1-input.txt')
+ex2 = Map('./examples/example2-input.txt')
+ex3 = Map('./examples/example3-input.txt')
+ex4 = Map('./examples/example4-input.txt')
+ex5 = Map('./examples/example5-input.txt')
+ex6 = Map('./examples/example6-input.txt')
+ex7 = Map('./examples/corner-case1.txt')
+ex8 = Map('./examples/corner-case2.txt')
+ex9 = Map('./examples/example-big.txt')
+assert ex1.rounds() == 27730
+assert ex2.rounds() == 36334
+assert ex3.rounds() == 39514
+assert ex4.rounds() == 27755
+assert ex5.rounds() == 28944
+assert ex6.rounds() == 18740
+assert ex7.rounds() == 13400
+assert ex8.rounds() == 13987
+print('All tests passed!')
+
+# Solution
+soln = Map('./day15-input.txt')
+print(soln.rounds())
