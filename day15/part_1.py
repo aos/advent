@@ -15,16 +15,8 @@
 #   - Picks target with fewest hit points -> deals damage equal to attack power
 
 
-from pprint import pprint
-from heapq import heappush, heappop
-
-
 def add_pts(pt1, pt2):
     return tuple(sum(item) for item in zip(pt1, pt2))
-
-
-def m_dist(pt1, pt2):
-    return abs(pt1[0] - pt2[0]) + abs(pt1[1] - pt2[1])
 
 
 def bfs(source, targets, m):
@@ -34,16 +26,14 @@ def bfs(source, targets, m):
         dists = [0]
         q = [source]
         visited = set()
-        d = -1
 
         while q:
             nxt = q.pop(0)
             dist = dists.pop(0)
             if nxt == i:
                 reachable.append((dist, nxt))
-                continue
+                break
             visited.add(nxt)
-            d += 1
             for neighbor in neighbors(nxt):
                 if (
                     neighbor not in visited and
@@ -51,7 +41,7 @@ def bfs(source, targets, m):
                     neighbor not in q
                 ):
                     q.append(neighbor)
-                    dists.append(d+dist)
+                    dists.append(dist + 1)
 
     return sorted(reachable, key=lambda p: (p[0], p[1][1], p[1][0]))
 
@@ -166,11 +156,6 @@ class Map:
                 self.units = self._clean_units()
 
             rnd += 1
-            #print('Round:', rnd)
-            #self.print()
-            #print()
-            #print()
-            #print('\n'.join([repr(u) for u in self.units]))
 
     def _get_map_sqs(self, sqs):
         return [self.map[s[1]][s[0]] for s in sqs]
@@ -195,26 +180,26 @@ class Map:
         return [u for u in self.units if u.alive]
 
 
-# Tests
-ex1 = Map('./examples/example1-input.txt')
-ex2 = Map('./examples/example2-input.txt')
-ex3 = Map('./examples/example3-input.txt')
-ex4 = Map('./examples/example4-input.txt')
-ex5 = Map('./examples/example5-input.txt')
-ex6 = Map('./examples/example6-input.txt')
-ex7 = Map('./examples/corner-case1.txt')
-ex8 = Map('./examples/corner-case2.txt')
-ex9 = Map('./examples/example-big.txt')
-assert ex1.rounds() == 27730
-assert ex2.rounds() == 36334
-assert ex3.rounds() == 39514
-assert ex4.rounds() == 27755
-assert ex5.rounds() == 28944
-assert ex6.rounds() == 18740
-assert ex7.rounds() == 13400
-assert ex8.rounds() == 13987
-print('All tests passed!')
+if __name__ == '__main__':
+    # Tests
+    ex1 = Map('./examples/example1-input.txt')
+    ex2 = Map('./examples/example2-input.txt')
+    ex3 = Map('./examples/example3-input.txt')
+    ex4 = Map('./examples/example4-input.txt')
+    ex5 = Map('./examples/example5-input.txt')
+    ex6 = Map('./examples/example6-input.txt')
+    ex7 = Map('./examples/corner-case1.txt')
+    ex8 = Map('./examples/corner-case2.txt')
+    assert ex1.rounds() == 27730
+    assert ex2.rounds() == 36334
+    assert ex3.rounds() == 39514
+    assert ex4.rounds() == 27755
+    assert ex5.rounds() == 28944
+    assert ex6.rounds() == 18740
+    assert ex7.rounds() == 13400
+    assert ex8.rounds() == 13987
+    print('All tests passed!')
 
-# Solution
-soln = Map('./day15-input.txt')
-print(soln.rounds())
+    # Solution
+    soln = Map('./day15-input.txt')
+    print(soln.rounds())
