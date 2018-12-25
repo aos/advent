@@ -1,4 +1,5 @@
 # Day 16 - Puzzle 1
+# How many samples behave like three or more opcodes?
 
 
 import opcodes as opc
