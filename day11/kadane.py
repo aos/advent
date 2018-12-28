@@ -4,20 +4,40 @@
 # The maximum subarray sum is 8 ([3, 5])
 
 
-def kadane(arr):
-    start = end = global_sum = curr_sum = 0
+def kadane(array):
+    global_sum = local_sum = 0
 
-    for index, k in enumerate(arr):
-        curr_sum = max(k, curr_sum + k)
+    for item in array:
+        local_sum = max(item, local_sum + item)
 
-        if k == curr_sum:
-            start = index
+        if local_sum > global_sum:
+            global_sum = local_sum
 
-        if curr_sum > global_sum:
-            global_sum = curr_sum
-            end = index
-
-    return arr[start:end+1]
+    return global_sum
 
 
-print(kadane([1, -2, 3, -2, 4]))
+arr = [1, -2, 3, 5, -5]
+arr_2 = [-2, 1, -3, 4, -1, 2, 1, -5, 4]
+print('kadane:', kadane(arr))
+print('kadane:', kadane(arr_2))
+
+
+def max_sum(array):
+    max_sum = 0
+    array_len = len(array)
+
+    for i in range(array_len):
+        for j in range(i, array_len):
+            if i == j:
+                curr_sum = array[i]
+            else:
+                curr_sum = curr_sum + array[j]
+
+            if curr_sum > max_sum:
+                max_sum = curr_sum
+
+    return max_sum
+
+
+print('max_sum:', max_sum(arr))
+print('max_sum:', max_sum(arr_2))
