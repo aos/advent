@@ -1,8 +1,10 @@
-# Day 17 - Puzzle 1
-# How many tiles can the water reach within the range of 'y' values in scan?
+# Day 17
+# Part 1 - How many tiles can water reach within range of 'y' values in scan?
+# Part 2 - How much stale water is left?
 
 import re
-from pprint import pprint
+import sys
+sys.setrecursionlimit(5000)
 
 
 class Model:
@@ -66,17 +68,71 @@ class Model:
     def fall(self, spring_x):
         # Get the transposed starting x position for spring
         spring_x = spring_x - self.bounds[0][0]
-        water = (spring_x, 0)
-        rnd = 0
+        self.fill(spring_x, 0)
 
-        while rnd < 6:
-            water = tuple(sum(item) for item in zip(water, (0, 1)))
-            water_x, water_y = water
-            self.earth[water_y][water_x] = '|'
-            rnd += 1
+    def fill(self, x, y):
+        if y >= len(self.earth):
+            return False
 
-    def scan(self):
-        pass
+        self.earth[y][x] = '|'
+
+        try:
+            if self.earth[y + 1][x] == '.':
+                self.fill(x, y + 1)
+
+            if (
+                self.earth[y + 1][x] in ['#', '~'] and
+                self.earth[y][x + 1] == '.'
+            ):
+                self.fill(x + 1, y)
+            if (
+                self.earth[y + 1][x] in ['#', '~'] and
+                self.earth[y][x - 1] == '.'
+            ):
+                self.fill(x - 1, y)
+
+            if self.has_both_walls(x, y):
+                self.fill_level(x, y)
+
+        except IndexError:
+            return False
+
+    def has_both_walls(self, x, y):
+        return self.has_wall(x, y, 1) and self.has_wall(x, y, -1)
+
+    def has_wall(self, x, y, offset):
+        curr = x
+        if curr >= len(self.earth[0]) or curr < 0:
+            return False
+        while True:
+            if self.earth[y][curr] == '.':
+                return False
+            if self.earth[y][curr] == '#':
+                return True
+            curr += offset
+
+    def fill_level(self, x, y):
+        return self.fill_side(x, y, 1), self.fill_side(x, y, -1)
+
+    def fill_side(self, x, y, offset):
+        curr = x
+        if curr >= len(self.earth[0]) or curr < 0:
+            return False
+        while True:
+            if self.earth[y][curr] == '#':
+                return True
+            self.earth[y][curr] = '~'
+            curr += offset
+
+    def count_water(self, types):
+        total = 0
+        min_y = self.bounds[0][1] if len(types) > 1 else 0
+        for row in self.earth:
+            for cell in row:
+                if cell in types:
+                    total += 1
+
+        return total - min_y
 
 
 # Tests
@@ -86,8 +142,17 @@ assert simple_model.clay == [
     {'y': 7, 'x': range(495, 502)}
 ]
 assert simple_model.bounds == [(494, 2), (502, 7)]
-print('All tests passed!')
 
 example_model = Model('./example-input.txt')
 example_model.fall(500)
-pprint(example_model.earth)
+assert example_model.count_water(['~', '|']) == 57
+assert example_model.count_water(['~']) == 29
+print('All tests passed!')
+
+# Solution Part 1
+soln_model = Model('./day17-input.txt')
+soln_model.fall(500)
+print(soln_model.count_water(['~', '|']))
+
+# Solution Part 2
+print(soln_model.count_water(['~']))
