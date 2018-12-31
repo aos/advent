@@ -58,7 +58,3 @@ if __name__ == '__main__':
     # Part 1
     ps = parse_file('./day19-input.txt')
     print(solve(ps, 0))
-
-    # Part 2
-    ps = parse_file('./day19-input.txt')
-    print(solve(ps, 1))
