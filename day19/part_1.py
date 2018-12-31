@@ -26,20 +26,17 @@ def parse_file(file):
     return ip, inputs
 
 
-def solve(inp):
-    registers = [0] * 6
+def solve(inp, first_reg):
+    registers = [first_reg, 0, 0, 0, 0, 0]
     bound_reg = inp[0]
     ip = 0
     instructions = inp[1]
 
-    while True:
-        # 1. Load instruction from IP location
-        try:
-            word, a, b, c = instructions[ip]
-        except IndexError:
-            return registers[0]
-        # 2. Update bound register to current IP value
+    while ip < len(instructions):
+        # 1. Update bound register to current IP value
         registers[bound_reg] = ip
+        # 2. Load instruction from IP location
+        word, a, b, c = instructions[ip]
         # 3. Execute instruction
         registers = eval(f'opc.{word}({registers}, {a}, {b}, {c})')
         # 4. Set IP to value of bound register
@@ -50,12 +47,18 @@ def solve(inp):
     return registers[0]
 
 
-# Tests
-test_line = 'addr 1 2 3'
-p = parse_file('./example-input.txt')
-assert parse_line(test_line) == ['addr', 1, 2, 3]
-assert solve(p) == 6
-print('All tests passed!')
+if __name__ == '__main__':
+    # Tests
+    test_line = 'addr 1 2 3'
+    p = parse_file('./example-input.txt')
+    assert parse_line(test_line) == ['addr', 1, 2, 3]
+    assert solve(p, 0) == 6
+    print('All tests passed!')
 
-# Solution
-print(solve(parse_file('./day19-input.txt')))
+    # Part 1
+    ps = parse_file('./day19-input.txt')
+    print(solve(ps, 0))
+
+    # Part 2
+    ps = parse_file('./day19-input.txt')
+    print(solve(ps, 1))
