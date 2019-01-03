@@ -4,7 +4,8 @@
 # requires passing through the most doors.
 
 # NB. This problem was not phrased correctly. The current stack solution should
-# NOT work in the general case.
+# NOT work in the general case, it assumes that all branching paths eventually
+# converge to their starting position.
 from collections import defaultdict
 from queue import Queue
 
@@ -41,7 +42,7 @@ def create_graph(string):
     return graph
 
 
-def longest_distance(graph):
+def distance(graph):
     q = Queue()
     start = (0, 0)
     q.put(start)
@@ -61,21 +62,21 @@ def longest_distance(graph):
 
 # Tests
 g1 = create_graph('^WNE$')
-assert max(longest_distance(g1)) == 3
+assert max(distance(g1)) == 3
 g2 = create_graph('^ENWWW(NEEE|SSE(EE|N))$')
-assert max(longest_distance(g2)) == 10
+assert max(distance(g2)) == 10
 g3 = create_graph('^ENNWSWW(NEWS|)SSSEEN(WNSE|)EE(SWEN|)NNN$')
-assert max(longest_distance(g3)) == 18
+assert max(distance(g3)) == 18
 g4 = create_graph(
     '^WSSEESWWWNW(S|NENNEEEENN(ESSSSW(NWSW|SSEN)|WSWWN(E|WWS(E|SS))))$'
 )
-assert max(longest_distance(g4)) == 31
+assert max(distance(g4)) == 31
 print('All tests passed!')
 
 # Part 1
 g_soln = create_graph(open('./day20-input.txt').read().strip())
-longest = longest_distance(g_soln)
-print(max(longest))
+d = distance(g_soln)
+print(max(d))
 
 # Part 2
-print(len(list(filter(lambda x: x >= 1000, longest))))
+print(len(list(filter(lambda x: x >= 1000, d))))
