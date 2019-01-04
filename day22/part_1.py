@@ -3,20 +3,11 @@
 # start and the target's coordinates
 
 
-def regions(target, depth):
+def cave_system(target, depth, max_x, max_y):
     risk = 0
-    end_x, end_y = target
-    grid = [[0 for i in range(end_x + 1)] for i in range(end_y + 1)]
+    grid = [[0 for i in range(max_x + 1)] for i in range(max_y + 1)]
 
-    # Populate (x, 0) erosion
-    for x in range(end_x + 1):
-        grid[0][x] = erosion_level((x, 0), grid, target, depth)
-
-    # Populate (0, y) erosion
-    for y in range(end_y + 1):
-        grid[y][0] = erosion_level((0, y), grid, target, depth)
-
-    # Populate rest of grid erosion
+    # Populate grid erosion
     for gy, row in enumerate(grid):
         for gx, cell in enumerate(row):
             grid[gy][gx] = erosion_level((gx, gy), grid, target, depth)
@@ -58,7 +49,8 @@ if __name__ == '__main__':
     # Tests
     test_depth = 510
     test_target = (10, 10)
-    assert regions(test_target, test_depth)[0] == 114
+    max_x, max_y = test_target
+    assert cave_system(test_target, test_depth, max_x, max_y)[0] == 114
     print('All tests passed!')
 
     # Solution
@@ -66,4 +58,4 @@ if __name__ == '__main__':
         depth, target = [line.rstrip().split(': ')[1]
                          for line in f.readlines()]
         target = [int(c) for c in target.split(',')]
-        print(regions(target, int(depth))[0])
+        print(cave_system(target, int(depth), target[0], target[1])[0])
