@@ -25,6 +25,7 @@ def solve(file):
 
 # Test
 assert solve('./example2.txt') == 36
+print('All tests passed!')
 
 # Solution
 print(solve('./day23-input.txt'))

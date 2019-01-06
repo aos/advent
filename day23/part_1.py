@@ -11,10 +11,7 @@ def manh_d(p1, p2):
 
 
 def parse_line(line):
-    return tuple((map(int, re.search(
-        r'pos=<([-]*\d+),([-]*\d+),([-]*\d+)>, r=([-]*\d+)',
-        line
-    ).groups())))
+    return tuple(map(int, re.findall(r'-?\d+', line)))
 
 
 def parse_input(file):
