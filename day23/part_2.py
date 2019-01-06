@@ -3,18 +3,28 @@
 # 0,0,0?
 
 
-from part_1 import manh_d, parse_input
+from part_1 import parse_input
+from collections import defaultdict
 
 
 def solve(file):
-    totals = []
+    ranges = []
+    points = defaultdict(int)
     inp = parse_input(file)
 
     for x, y, z, r in inp:
         s = x + y + z
-        totals.append((s - r, s + r))
+        ranges.append((s - r, s + r))
 
-    return totals
+    for low, high in ranges:
+        points[low] += 1
+        points[high] += 1
+
+    return max(points.keys(), key=(lambda k: points[k]))
 
 
-print(solve('./example2.txt'))
+# Test
+assert solve('./example2.txt') == 36
+
+# Solution
+print(solve('./day23-input.txt'))
