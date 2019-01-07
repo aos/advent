@@ -8,15 +8,13 @@ from collections import defaultdict
 
 
 def solve(file):
-    ranges = []
     points = defaultdict(int)
     inp = parse_input(file)
 
     for x, y, z, r in inp:
         s = x + y + z
-        ranges.append((s - r, s + r))
+        low, high = (s - r, s + r)
 
-    for low, high in ranges:
         points[low] += 1
         points[high] += 1
 
