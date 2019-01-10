@@ -21,6 +21,8 @@
 
 
 import re
+from math import ceil
+from pprint import pprint
 
 
 class Group:
@@ -35,6 +37,19 @@ class Group:
         self.imms = imms
         self.ep = units * att_dmg
         self.alive = True
+
+    def calc_dmg_taken(self, enemy_dmg, enemy_dmg_type):
+        if enemy_dmg_type in self.weak:
+            enemy_dmg *= 2
+        elif enemy_dmg_type in self.imms:
+            enemy_dmg = 0
+
+        return enemy_dmg
+
+    def take_dmg(self, dmg):
+        total_hp_remaining = (self.num_units * self.hp) - dmg
+        self.num_units = ceil(total_hp_remaining / self.num_units)
+        return self.num_units
 
     def __repr__(self):
         return ('Group({}, Units: {}, HP: {}, DMG: {}, D_type: {}, Init: {}, '
@@ -84,5 +99,18 @@ def parse_input(file):
     return groups
 
 
+def fight(groups):
+    # 1. Target selection
+    # Sort on effective power, tie-breaker
+    groups.sort(key=lambda g: (g.ep, g.init), reverse=True)
+    for group in groups:
+        enemies = list(filter(lambda e: e.a_type != group.a_type, groups))
+
+    # 2. Attacking
+    pass
+
+
 # Tests
-p = parse_input('./example-input.txt')
+groups = parse_input('./example-input.txt')
+fight(groups)
+pprint(groups)
