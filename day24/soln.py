@@ -1,4 +1,4 @@
-# Day 24 - Part 1
+# Day 24
 # How many units would the winning army have?
 
 # Target selection:
