@@ -1,5 +1,4 @@
-# Advent of Code (2018)
+## Advent of Code
 
-[Advent of Code 2018](https://adventofcode.com/)
-
-My first year doing this!
+- 2018 (Python) **Completed**
+- 2019 (Go) **In Progress**
