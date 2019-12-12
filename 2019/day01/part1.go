@@ -1,4 +1,4 @@
-// Day 1 - Puzzle 1
+// Part 1
 // What is the sum of the fuel requirements for all of the modules on your
 // spacecraft? fuel = floor(mass / 3) - 2
 
