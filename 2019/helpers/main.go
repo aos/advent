@@ -20,3 +20,15 @@ func SplitComma(data []byte, atEOF bool) (int, []byte, error) {
 
 	return 0, data, bufio.ErrFinalToken
 }
+
+// ManhattanDistance calculates the manhattan distances between two Points
+func ManhattanDistance(pOne, pTwo Point) int {
+	return abs(pOne.X-pTwo.X) + abs(pOne.Y-pTwo.Y)
+}
+
+func abs(n int) int {
+	if n < 0 {
+		return -n
+	}
+	return n
+}
