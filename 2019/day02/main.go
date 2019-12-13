@@ -9,6 +9,8 @@ import (
 	"os"
 	"strconv"
 	"strings"
+
+	"aoc/helpers"
 )
 
 func main() {
@@ -28,16 +30,7 @@ func convertToOpcodes(input io.Reader) []int {
 	var opcodes []int
 
 	scanner := bufio.NewScanner(input)
-	onComma := func(data []byte, atEOF bool) (int, []byte, error) {
-		for i := 0; i < len(data); i++ {
-			if data[i] == ',' {
-				return i + 1, data[:i], nil
-			}
-		}
-
-		return 0, data, bufio.ErrFinalToken
-	}
-	scanner.Split(onComma)
+	scanner.Split(helpers.SplitComma)
 
 	for scanner.Scan() {
 		t := strings.TrimSuffix(scanner.Text(), "\n")
