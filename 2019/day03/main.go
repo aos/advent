@@ -1,3 +1,4 @@
+// Day 3
 package main
 
 import (
@@ -17,6 +18,7 @@ func main() {
 	wiresCoords := parseInput(in)
 
 	fmt.Println(PartOne(wiresCoords))
+	fmt.Println(PartTwo(wiresCoords))
 }
 
 func parseInput(f io.Reader) [][]string {

@@ -1,3 +1,6 @@
+// Part 1
+// What is the Manhattan distance from the central port to the closest
+// intersection?
 package main
 
 import (
@@ -23,12 +26,7 @@ func (w Wire) Intersect(other Wire) []Point {
 
 // PartOne finds the Manhattan distance between Wires
 func PartOne(wiresCoords [][]string) int {
-	wires := make([]Wire, len(wiresCoords))
-	for i := range wiresCoords {
-		wires[i] = TraceWireOnMap(wiresCoords[i])
-	}
-	intersect := wires[0].Intersect(wires[1])
-
+	intersect := FindIntersections(wiresCoords)
 	minDistance := math.MaxInt64
 	for ix := range intersect {
 		d := ManhattanDistance(intersect[ix], Point{X: 0, Y: 0})
@@ -38,6 +36,17 @@ func PartOne(wiresCoords [][]string) int {
 	}
 
 	return minDistance
+}
+
+// FindIntersections returns an array of the intersecting points given wire
+// coordinates
+func FindIntersections(wiresCoords [][]string) []Point {
+	wires := make([]Wire, len(wiresCoords))
+	for i := range wiresCoords {
+		wires[i] = TraceWireOnMap(wiresCoords[i])
+	}
+	intersectingWires := wires[0].Intersect(wires[1])
+	return intersectingWires
 }
 
 // TraceWireOnMap creats a Wire set with all the points
