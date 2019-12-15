@@ -2,6 +2,10 @@ package helpers
 
 import (
 	"bufio"
+	"io/ioutil"
+	"log"
+	"strconv"
+	"strings"
 )
 
 // Point is an X,Y coordinate location
@@ -31,4 +35,23 @@ func abs(n int) int {
 		return -n
 	}
 	return n
+}
+
+// ReadOpcodesFromFile reads a file with opcodes ("39,29,10") and converts it to an
+// integer array
+func ReadOpcodesFromFile(f string) []int {
+	input, err := ioutil.ReadFile(f)
+	if err != nil {
+		log.Fatal(err)
+	}
+	out := strings.Split(strings.TrimSpace(string(input)), ",")
+	opcodes := make([]int, len(out))
+	for i := range out {
+		toInt, err := strconv.Atoi(out[i])
+		if err != nil {
+			log.Fatal(err)
+		}
+		opcodes[i] = toInt
+	}
+	return opcodes
 }
