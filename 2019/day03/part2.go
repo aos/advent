@@ -9,7 +9,7 @@
 package main
 
 import (
-	. "aoc/helpers"
+	h "aoc/helpers"
 	"log"
 	"math"
 	"strconv"
@@ -21,13 +21,13 @@ func PartTwo(wiresCoords [][]string) int {
 	intersections := FindIntersections(wiresCoords)
 	// 2. For each wire, count number of steps each wire takes to get to
 	// each intersection
-	intersectMap := make(map[Point]bool)
+	intersectMap := make(map[h.Point]bool)
 	for i := range intersections {
 		if _, ok := intersectMap[intersections[i]]; !ok {
 			intersectMap[intersections[i]] = true
 		}
 	}
-	pointStepsMap := make(map[Point]int)
+	pointStepsMap := make(map[h.Point]int)
 	for t := range wiresCoords {
 		FindSteps(wiresCoords[t], intersectMap, pointStepsMap)
 	}
@@ -42,7 +42,7 @@ func PartTwo(wiresCoords [][]string) int {
 }
 
 // FindSteps finds the number of steps a wire takes to each intersection
-func FindSteps(w []string, intersectMap map[Point]bool, pointSteps map[Point]int) map[Point]int {
+func FindSteps(w []string, intersectMap map[h.Point]bool, pointSteps map[h.Point]int) map[h.Point]int {
 	x, y := 0, 0
 	steps := 0
 	for _, dot := range w {
@@ -57,7 +57,7 @@ func FindSteps(w []string, intersectMap map[Point]bool, pointSteps map[Point]int
 			for t := 0; t < length; t++ {
 				y++
 				steps++
-				p := Point{X: x, Y: y}
+				p := h.Point{X: x, Y: y}
 				if intersectMap[p] {
 					pointSteps[p] += steps
 
@@ -67,7 +67,7 @@ func FindSteps(w []string, intersectMap map[Point]bool, pointSteps map[Point]int
 			for t := 0; t < length; t++ {
 				y--
 				steps++
-				p := Point{X: x, Y: y}
+				p := h.Point{X: x, Y: y}
 				if intersectMap[p] {
 					pointSteps[p] += steps
 				}
@@ -76,7 +76,7 @@ func FindSteps(w []string, intersectMap map[Point]bool, pointSteps map[Point]int
 			for t := 0; t < length; t++ {
 				x--
 				steps++
-				p := Point{X: x, Y: y}
+				p := h.Point{X: x, Y: y}
 				if intersectMap[p] {
 					pointSteps[p] += steps
 				}
@@ -85,7 +85,7 @@ func FindSteps(w []string, intersectMap map[Point]bool, pointSteps map[Point]int
 			for t := 0; t < length; t++ {
 				x++
 				steps++
-				p := Point{X: x, Y: y}
+				p := h.Point{X: x, Y: y}
 				if intersectMap[p] {
 					pointSteps[p] += steps
 				}

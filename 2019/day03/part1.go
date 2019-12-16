@@ -4,18 +4,18 @@
 package main
 
 import (
-	. "aoc/helpers"
+	h "aoc/helpers"
 	"log"
 	"math"
 	"strconv"
 )
 
 // Wire contains the Point coordinates tracing set for a wire
-type Wire map[Point]bool
+type Wire map[h.Point]bool
 
 // Intersect finds the points where two wires cross
-func (w Wire) Intersect(other Wire) []Point {
-	var res []Point
+func (w Wire) Intersect(other Wire) []h.Point {
+	var res []h.Point
 	for k := range w {
 		if _, ok := other[k]; ok {
 			res = append(res, k)
@@ -29,7 +29,7 @@ func PartOne(wiresCoords [][]string) int {
 	intersect := FindIntersections(wiresCoords)
 	minDistance := math.MaxInt64
 	for ix := range intersect {
-		d := ManhattanDistance(intersect[ix], Point{X: 0, Y: 0})
+		d := h.ManhattanDistance(intersect[ix], h.Point{X: 0, Y: 0})
 		if d < minDistance {
 			minDistance = d
 		}
@@ -40,7 +40,7 @@ func PartOne(wiresCoords [][]string) int {
 
 // FindIntersections returns an array of the intersecting points given wire
 // coordinates
-func FindIntersections(wiresCoords [][]string) []Point {
+func FindIntersections(wiresCoords [][]string) []h.Point {
 	wires := make([]Wire, len(wiresCoords))
 	for i := range wiresCoords {
 		wires[i] = TraceWireOnMap(wiresCoords[i])
@@ -63,22 +63,22 @@ func TraceWireOnMap(w []string) Wire {
 		switch direction {
 		case 'U':
 			for t := 0; t < length+1; t++ {
-				wire[Point{X: x, Y: y + t}] = true
+				wire[h.Point{X: x, Y: y + t}] = true
 			}
 			y += length
 		case 'D':
 			for t := 0; t < length+1; t++ {
-				wire[Point{X: x, Y: y - t}] = true
+				wire[h.Point{X: x, Y: y - t}] = true
 			}
 			y -= length
 		case 'L':
 			for t := 0; t < length+1; t++ {
-				wire[Point{X: x - t, Y: y}] = true
+				wire[h.Point{X: x - t, Y: y}] = true
 			}
 			x -= length
 		case 'R':
 			for t := 0; t < length+1; t++ {
-				wire[Point{X: x + t, Y: y}] = true
+				wire[h.Point{X: x + t, Y: y}] = true
 			}
 			x += length
 		default:
@@ -87,6 +87,6 @@ func TraceWireOnMap(w []string) Wire {
 
 	}
 	// Does not count towards intersection
-	delete(wire, Point{X: 0, Y: 0})
+	delete(wire, h.Point{X: 0, Y: 0})
 	return wire
 }
