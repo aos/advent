@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"io/ioutil"
 	"log"
+	"math"
 	"strconv"
 	"strings"
 )
@@ -27,14 +28,7 @@ func SplitComma(data []byte, atEOF bool) (int, []byte, error) {
 
 // ManhattanDistance calculates the manhattan distances between two Points
 func ManhattanDistance(pOne, pTwo Point) int {
-	return abs(pOne.X-pTwo.X) + abs(pOne.Y-pTwo.Y)
-}
-
-func abs(n int) int {
-	if n < 0 {
-		return -n
-	}
-	return n
+	return Abs(pOne.X-pTwo.X) + Abs(pOne.Y-pTwo.Y)
 }
 
 // ReadOpcodesFromFile reads a file with opcodes ("39,29,10") and converts it to an
@@ -54,4 +48,23 @@ func ReadOpcodesFromFile(f string) []int {
 		opcodes[i] = toInt
 	}
 	return opcodes
+}
+
+// Min is an integer variadic min function
+func Min(n ...int) int {
+	min := math.MaxInt64
+	for i := range n {
+		if n[i] <= min {
+			min = n[i]
+		}
+	}
+	return min
+}
+
+// Abs is an integer version of absolute value
+func Abs(n int) int {
+	if n < 0 {
+		return -n
+	}
+	return n
 }
