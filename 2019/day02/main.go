@@ -4,11 +4,11 @@ package main
 import (
 	"fmt"
 
-	"aoc/helpers"
+	oc "aoc/helpers/opcodes"
 )
 
 func main() {
-	opcodes := helpers.ReadOpcodesFromFile("./day02-input.txt")
+	opcodes := oc.ReadOpcodesFromFile("./day02-input.txt")
 
 	fmt.Println("Part one:", PartOne(opcodes))
 	fmt.Println("Part two:", PartTwo(opcodes))
