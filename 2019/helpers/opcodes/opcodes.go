@@ -6,8 +6,8 @@ import (
 	"strings"
 )
 
-// ReadOpcodesFromFile reads a file with opcodes ("39,29,10") and converts it to an
-// integer array
+// ReadOpcodesFromFile reads a file with opcodes ("39,29,10") and converts it
+// to an integer array
 func ReadOpcodesFromFile(f string) []int {
 	input, err := ioutil.ReadFile(f)
 	if err != nil {
@@ -31,7 +31,6 @@ func OpcodeVM(o []int, in, out chan int) {
 	copy(opcodes, o)
 	pc := 0
 	pcMove := 0
-	// reader := bufio.NewReader(os.Stdin)
 
 loop:
 	for {
@@ -48,24 +47,15 @@ loop:
 		// opcode 3 - takes integer input, saves to position @ parameter
 		case 3:
 			input := <-in
-			//if err != nil {
-			//	panic(err)
-			//}
-			//value, err := strconv.Atoi(strings.TrimSpace(in))
-			//if err != nil {
-			//	panic(err)
-			//}
 			opcodes[opcodes[pc+1]] = input
 			pcMove = 2
 
 		// opcode 4 - outputs value of parameter
 		case 4:
 			if inst[1] == 0 {
-				// fmt.Println(opcodes[opcodes[pc+1]])
 				out <- opcodes[opcodes[pc+1]]
 			} else {
 				out <- opcodes[pc+1]
-				//fmt.Println(opcodes[pc+1])
 			}
 			pcMove = 2
 
