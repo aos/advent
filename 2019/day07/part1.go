@@ -3,67 +3,41 @@ package main
 import (
 	"aoc/helpers/opcodes"
 	"fmt"
-	"math"
-	"sync"
 )
 
 // PartOne ...
 func PartOne(oc []int) {
 	perms := createPermutations(0, 4)
 	signals := make(chan int, len(perms))
-	sendWork := make(chan []int)
-
-	var wg sync.WaitGroup
-	workers := 3
-	wg.Add(workers)
-
-	// Parallelize this
-	for i := 0; i < workers; i++ {
-		go func() {
-			for perm := range sendWork {
-				in := make(chan int, 2)
-				out := make(chan int, 1)
-				in <- perm[0]
-				in <- 0
-				opcodes.OpcodeVM(oc, in, out)
-
-				settings := []int{
-					perm[1],
-					perm[2],
-					perm[3],
-					perm[4],
-				}
-				for j := range settings {
-					in <- settings[j]
-					in <- (<-out)
-					opcodes.OpcodeVM(oc, in, out)
-				}
-				close(in)
-				close(out)
-				signals <- (<-out)
-			}
-			wg.Done()
-		}()
-	}
-
-	max := math.MinInt64
-	go func() {
-		for p := range signals {
-			if p > max {
-				max = p
-			}
-		}
-	}()
-
+	in := make(chan int, 2)
 	for i := range perms {
-		sendWork <- perms[i]
+		in <- perms[i][0]
+		in <- 0
+		out, _ := opcodes.OpcodeVM(oc, in)
+
+		settings := []int{
+			perms[i][1],
+			perms[i][2],
+			perms[i][3],
+			perms[i][4],
+		}
+		for j := range settings {
+			in = make(chan int, 2)
+			in <- settings[j]
+			in <- (<-out)
+			out, _ = opcodes.OpcodeVM(oc, in)
+		}
+		signals <- (<-out)
 	}
-	close(sendWork)
 
-	wg.Wait()
+	max := -1
 	close(signals)
-
-	fmt.Println(max)
+	for s := range signals {
+		if s > max {
+			max = s
+		}
+	}
+	fmt.Println("Part one:", max)
 }
 
 func createPermutations(first, last int) [][]int {

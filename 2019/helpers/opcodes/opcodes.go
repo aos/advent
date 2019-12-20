@@ -1,6 +1,7 @@
 package opcodes
 
 import (
+	"fmt"
 	"io/ioutil"
 	"strconv"
 	"strings"
@@ -26,62 +27,78 @@ func ReadOpcodesFromFile(f string) []int {
 }
 
 // OpcodeVM is the VM that takes in opcodes and runs them
-func OpcodeVM(o []int, in, out chan int) {
+func OpcodeVM(o []int, in chan int) (chan int, chan bool) {
 	opcodes := make([]int, len(o))
 	copy(opcodes, o)
-	pc := 0
-	pcMove := 0
+	out := make(chan int)
+	done := make(chan bool, 1)
 
-loop:
-	for {
-		inst := parseInstruction(opcodes[pc])
-		paramOne, paramTwo := setParams(opcodes, inst, pc)
-		switch inst[0] {
-		// opcode 1 - addition
-		// opcode 2 - multiplication
-		case 1, 2:
-			opcodes[opcodes[pc+3]] =
-				applyAddMult(inst[0], paramOne, paramTwo)
-			pcMove = 4
+	go func() {
+		pc := 0
+		pcMove := 0
+	loop:
+		for {
+			inst := parseInstruction(opcodes[pc])
+			paramOne, paramTwo := setParams(opcodes, inst, pc)
+			switch inst[0] {
+			// opcode 1 - addition
+			// opcode 2 - multiplication
+			case 1, 2:
+				opcodes[opcodes[pc+3]] =
+					applyAddMult(inst[0], paramOne, paramTwo)
+				pcMove = 4
 
-		// opcode 3 - takes integer input, saves to position @ parameter
-		case 3:
-			input := <-in
-			opcodes[opcodes[pc+1]] = input
-			pcMove = 2
+			// opcode 3 - takes integer input, saves to position @ parameter
+			case 3:
+				opcodes[opcodes[pc+1]] = <-in
+				pcMove = 2
 
-		// opcode 4 - outputs value of parameter
-		case 4:
-			if inst[1] == 0 {
-				out <- opcodes[opcodes[pc+1]]
-			} else {
-				out <- opcodes[pc+1]
+			// opcode 4 - outputs value of parameter
+			case 4:
+				if inst[1] == 0 {
+					out <- opcodes[opcodes[pc+1]]
+
+				} else {
+					out <- opcodes[pc+1]
+				}
+				pcMove = 2
+
+			// opcode 5 - jump-if-true
+			// opcode 6 - jump-if-false
+			case 5, 6:
+				if res, ok := applyJump(inst[0], paramOne, paramTwo); ok {
+					pc = res
+					continue loop
+				}
+				pcMove = 3
+
+			// opcode 7 - less than
+			// opcode 8 - equals
+			case 7, 8:
+				opcodes[opcodes[pc+3]] =
+					applyCompare(inst[0], paramOne, paramTwo)
+				pcMove = 4
+
+			// opcode 99 - halt
+			case 99:
+				done <- true
+				close(out)
+				return
+
+			default:
+				fmt.Printf(
+					"error: failed to match intcode: %d\n",
+					inst)
+				done <- true
+				close(out)
+				return
 			}
-			pcMove = 2
 
-		// opcode 5 - jump-if-true
-		// opcode 6 - jump-if-false
-		case 5, 6:
-			if res, ok := applyJump(inst[0], paramOne, paramTwo); ok {
-				pc = res
-				continue loop
-			}
-			pcMove = 3
-
-		// opcode 7 - less than
-		// opcode 8 - equals
-		case 7, 8:
-			opcodes[opcodes[pc+3]] =
-				applyCompare(inst[0], paramOne, paramTwo)
-			pcMove = 4
-
-		// opcode 99 - halt
-		case 99:
-			break loop
+			pc += pcMove
 		}
 
-		pc += pcMove
-	}
+	}()
+	return out, done
 }
 
 func parseInstruction(n int) []int {

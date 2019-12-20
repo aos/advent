@@ -5,7 +5,7 @@ import (
 )
 
 func main() {
-	oc := opcodes.ReadOpcodesFromFile("./day07-example4.txt")
-	// PartOne(oc)
+	oc := opcodes.ReadOpcodesFromFile("./day07-input.txt")
+	PartOne(oc)
 	PartTwo(oc)
 }

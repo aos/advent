@@ -3,46 +3,69 @@ package main
 import (
 	"aoc/helpers/opcodes"
 	"fmt"
-	"math"
+	"sync"
 )
+
+type safeHighest struct {
+	num int
+	mux sync.Mutex
+}
 
 // PartTwo ...
 func PartTwo(oc []int) {
 	perms := createPermutations(5, 9)
-	signals := make(chan int, len(perms))
+	highest := safeHighest{num: -1}
 
-	for i := range perms {
-		in := make(chan int, 2)
-		out := make(chan int, 1)
-		in <- perms[i][0]
-		in <- 0
-		opcodes.OpcodeVM(oc, in, out)
+	for _, perm := range perms {
+		ins := make([]chan int, len(perm))
+		outs := make([]chan int, len(perm))
+		dones := make([]chan bool, len(perm))
 
-		settings := []int{
-			perms[i][1],
-			perms[i][2],
-			perms[i][3],
-			perms[i][4],
+		for i, val := range perm {
+			in := make(chan int, 1)
+			out, done := opcodes.OpcodeVM(oc, in)
+
+			in <- val
+			if i == 0 {
+				in <- 0
+			}
+
+			ins[i] = in
+			outs[i] = out
+			dones[i] = done
 		}
-		for j := range settings {
-			in <- settings[j]
-			in <- (<-out)
-			opcodes.OpcodeVM(oc, in, out)
-		}
 
-		in <- (<-out)
-		opcodes.OpcodeVM(oc, in, in)
-		close(in)
-		close(out)
-		signals <- (<-out)
+		var wg sync.WaitGroup
+		wg.Add(len(ins))
+
+		for j := range ins {
+			go func(idx int) {
+				defer wg.Done()
+
+				oldIdx := idx - 1
+				if idx == 0 {
+					oldIdx = len(ins) - 1
+				}
+
+				// Listen on old output channel and feed into
+				// next input channel
+				for val := range outs[oldIdx] {
+					select {
+					case <-dones[idx]:
+						highest.mux.Lock()
+						if val > highest.num {
+							highest.num = val
+						}
+						highest.mux.Unlock()
+						return
+					default:
+						ins[idx] <- val
+					}
+
+				}
+			}(j)
+		}
+		wg.Wait()
 	}
-	close(signals)
-
-	max := math.MinInt64
-	for p := range signals {
-		if p > max {
-			max = p
-		}
-	}
-	fmt.Println(max)
+	fmt.Println("Part two:", highest.num)
 }
