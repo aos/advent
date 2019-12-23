@@ -3,6 +3,7 @@ package opcodes
 import (
 	"fmt"
 	"io/ioutil"
+	"math"
 	"strconv"
 	"strings"
 )
@@ -28,7 +29,7 @@ func ReadOpcodesFromFile(f string) []int {
 
 // OpcodeVM is the VM that takes in opcodes and runs them
 func OpcodeVM(o []int, in chan int) (chan int, chan bool) {
-	opcodes := make([]int, len(o))
+	opcodes := make([]int, math.MaxInt16)
 	copy(opcodes, o)
 	out := make(chan int)
 	done := make(chan bool, 1)
@@ -36,37 +37,39 @@ func OpcodeVM(o []int, in chan int) (chan int, chan bool) {
 	go func() {
 		pc := 0
 		pcMove := 0
+		relBase := 0
 	loop:
 		for {
 			inst := parseInstruction(opcodes[pc])
-			paramOne, paramTwo := setParams(opcodes, inst, pc)
+			paramOne, paramTwo, paramThree :=
+				setParams(opcodes, inst, pc, relBase)
 			switch inst[0] {
 			// opcode 1 - addition
 			// opcode 2 - multiplication
 			case 1, 2:
-				opcodes[opcodes[pc+3]] =
+				opcodes[paramThree] =
 					applyAddMult(inst[0], paramOne, paramTwo)
 				pcMove = 4
 
-			// opcode 3 - takes integer input, saves to position @ parameter
+			// opcode 3 - takes integer input, saves to position
 			case 3:
-				opcodes[opcodes[pc+1]] = <-in
+				idx := opcodes[pc+1]
+				if inst[1] == 2 {
+					idx += relBase
+				}
+				opcodes[idx] = <-in
 				pcMove = 2
 
 			// opcode 4 - outputs value of parameter
 			case 4:
-				if inst[1] == 0 {
-					out <- opcodes[opcodes[pc+1]]
-
-				} else {
-					out <- opcodes[pc+1]
-				}
+				out <- paramOne
 				pcMove = 2
 
 			// opcode 5 - jump-if-true
 			// opcode 6 - jump-if-false
 			case 5, 6:
-				if res, ok := applyJump(inst[0], paramOne, paramTwo); ok {
+				if res, ok :=
+					applyJump(inst[0], paramOne, paramTwo); ok {
 					pc = res
 					continue loop
 				}
@@ -75,9 +78,14 @@ func OpcodeVM(o []int, in chan int) (chan int, chan bool) {
 			// opcode 7 - less than
 			// opcode 8 - equals
 			case 7, 8:
-				opcodes[opcodes[pc+3]] =
+				opcodes[paramThree] =
 					applyCompare(inst[0], paramOne, paramTwo)
 				pcMove = 4
+
+			// opcode 9 - adjust relative base offset
+			case 9:
+				relBase += paramOne
+				pcMove = 2
 
 			// opcode 99 - halt
 			case 99:
@@ -102,6 +110,7 @@ func OpcodeVM(o []int, in chan int) (chan int, chan bool) {
 }
 
 func parseInstruction(n int) []int {
+	// [instruction, mode of 1st param, mode of 2nd param, ...]
 	inst := make([]int, 4)
 	inst[0] = n % 100
 	n /= 100
@@ -139,26 +148,44 @@ func applyCompare(n, p1, p2 int) int {
 	return 0
 }
 
-func setParams(opcodes, inst []int, pc int) (int, int) {
+func setParams(opcodes, inst []int, pc, base int) (int, int, int) {
 	paramOne := 0
 	paramTwo := 0
+	paramThree := 0
 
 	switch inst[0] {
-	case 1, 2, 5, 6, 7, 8:
+	case 1, 2, 4, 5, 6, 7, 8, 9:
 		if inst[1] == 0 {
+			// Parameter mode = 0
 			paramOne = opcodes[opcodes[pc+1]]
-		} else {
+		} else if inst[1] == 1 {
 			paramOne = opcodes[pc+1]
+			// Immediate mode = 1
+		} else {
+			// Relative mode  = 2
+			idx := base + opcodes[pc+1]
+			paramOne = opcodes[idx]
 		}
 
 		if inst[2] == 0 {
 			paramTwo = opcodes[opcodes[pc+2]]
-		} else {
+		} else if inst[2] == 1 {
 			paramTwo = opcodes[pc+2]
+		} else {
+			idx := base + opcodes[pc+2]
+			paramTwo = opcodes[idx]
+		}
+
+		if inst[3] == 0 {
+			paramThree = opcodes[pc+3]
+		} else if inst[3] == 1 {
+			paramThree = pc + 3
+		} else {
+			paramThree = base + opcodes[pc+3]
 		}
 	default:
-		paramOne, paramTwo = 0, 0
+		paramOne, paramTwo, paramThree = 0, 0, 0
 	}
 
-	return paramOne, paramTwo
+	return paramOne, paramTwo, paramThree
 }
