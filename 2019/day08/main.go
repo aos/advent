@@ -8,11 +8,14 @@ import (
 )
 
 func main() {
-	var image [][]byte
-	layerSize := 2 * 2
+	var image [][][]byte
+	width := 2
+	height := 2
+	layerSize := width * height
 	nums := parseFile("./day08-example2.txt")
 
-	var layer []byte
+	var layer [][]byte
+	var row []byte
 	lastZeroesCount := math.MaxInt32
 	numZeroes := 0
 	zeroesLayer := 0
@@ -20,7 +23,12 @@ func main() {
 		if n == '0' {
 			numZeroes++
 		}
-		layer = append(layer, n)
+
+		row = append(row, n)
+		if (i+1)%width == 0 {
+			layer = append(layer, row)
+			row = nil
+		}
 
 		if (i+1)%layerSize == 0 {
 			image = append(image, layer)
@@ -34,28 +42,47 @@ func main() {
 			numZeroes = 0
 		}
 	}
-	fmt.Println("Part 1:", multiplyDigits(image[zeroesLayer]))
+	// fmt.Println(multiplyDigits(image[zeroesLayer]))
+
+	fmt.Println(zeroesLayer)
+	// fmt.Println(image)
+	renderImage(image)
 }
 
 // Part 1
-func multiplyDigits(layer []byte) int {
+func multiplyDigits(layer [][]byte) int {
 	onesCount := 0
 	twosCount := 0
 
-	for _, n := range layer {
-		if n == '1' {
-			onesCount++
-		}
-		if n == '2' {
-			twosCount++
+	for i := range layer {
+		for _, n := range layer[i] {
+			if n == '1' {
+				onesCount++
+			}
+			if n == '2' {
+				twosCount++
+			}
 		}
 	}
 
 	return onesCount * twosCount
 }
 
-func renderImage([][]byte) {
+// Part 2
+func renderImage(image [][][]byte) {
+	width := 2
+	height := 2
+	numLayers := len(image)
+	// var final [][]byte
 
+	for i := 0; i < width; i++ {
+		for j := 0; j < height; j++ {
+			var row []byte
+			for l := 0; l < numLayers; l++ {
+				row = append(row, image[l][j][i])
+			}
+		}
+	}
 }
 
 func parseFile(f string) []byte {
