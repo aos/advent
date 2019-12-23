@@ -1,3 +1,4 @@
+// Day 7
 package main
 
 import (

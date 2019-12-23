@@ -5,20 +5,19 @@ import (
 	"fmt"
 	"io/ioutil"
 	"math"
-	"strconv"
 )
 
 func main() {
-	var image [][]int
-	layerSize := 25 * 6
-	nums := parseFile("./day08-input.txt")
+	var image [][]byte
+	layerSize := 2 * 2
+	nums := parseFile("./day08-example2.txt")
 
-	var layer []int
+	var layer []byte
 	lastZeroesCount := math.MaxInt32
 	numZeroes := 0
 	zeroesLayer := 0
 	for i, n := range nums {
-		if n == 0 {
+		if n == '0' {
 			numZeroes++
 		}
 		layer = append(layer, n)
@@ -35,18 +34,19 @@ func main() {
 			numZeroes = 0
 		}
 	}
-	fmt.Println(multiplyDigits(image[zeroesLayer]))
+	fmt.Println("Part 1:", multiplyDigits(image[zeroesLayer]))
 }
 
-func multiplyDigits(layer []int) int {
+// Part 1
+func multiplyDigits(layer []byte) int {
 	onesCount := 0
 	twosCount := 0
 
 	for _, n := range layer {
-		if n == 1 {
+		if n == '1' {
 			onesCount++
 		}
-		if n == 2 {
+		if n == '2' {
 			twosCount++
 		}
 	}
@@ -54,20 +54,14 @@ func multiplyDigits(layer []int) int {
 	return onesCount * twosCount
 }
 
-func parseFile(f string) []int {
+func renderImage([][]byte) {
+
+}
+
+func parseFile(f string) []byte {
 	out, err := ioutil.ReadFile(f)
 	if err != nil {
 		panic(err)
 	}
-	out = out[:len(out)-1]
-	ints := make([]int, len(out))
-
-	for i := range out {
-		num, err := strconv.Atoi(string(out[i]))
-		if err != nil {
-			panic(err)
-		}
-		ints[i] = num
-	}
-	return ints
+	return out[:len(out)-1]
 }
