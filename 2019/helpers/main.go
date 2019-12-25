@@ -5,28 +5,6 @@ import (
 	"math"
 )
 
-// Point is an X,Y coordinate location
-type Point struct {
-	X int
-	Y int
-}
-
-// SplitComma defines a custom SplitFunc for bufio.Scanner
-func SplitComma(data []byte, atEOF bool) (int, []byte, error) {
-	for i := 0; i < len(data); i++ {
-		if data[i] == ',' {
-			return i + 1, data[:i], nil
-		}
-	}
-
-	return 0, data, bufio.ErrFinalToken
-}
-
-// ManhattanDistance calculates the manhattan distances between two Points
-func ManhattanDistance(pOne, pTwo Point) int {
-	return Abs(pOne.X-pTwo.X) + Abs(pOne.Y-pTwo.Y)
-}
-
 // Min is an integer variadic min function
 func Min(n ...int) int {
 	min := math.MaxInt64
@@ -44,4 +22,15 @@ func Abs(n int) int {
 		return -n
 	}
 	return n
+}
+
+// SplitComma defines a custom SplitFunc for bufio.Scanner
+func SplitComma(data []byte, atEOF bool) (int, []byte, error) {
+	for i := 0; i < len(data); i++ {
+		if data[i] == ',' {
+			return i + 1, data[:i], nil
+		}
+	}
+
+	return 0, data, bufio.ErrFinalToken
 }

@@ -1,3 +1,5 @@
+// Package opcodes adds the Intcode VM and helper function to parse
+// instructions from file
 package opcodes
 
 import (
