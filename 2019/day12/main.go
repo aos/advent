@@ -37,7 +37,7 @@ func main() {
 	r := 0
 	// Steps
 	for {
-		if *debug {
+		if *part == 1 && *debug {
 			fmt.Printf("After %d steps:\n", r)
 			for m := range moons {
 				fmt.Println(moons[m])
@@ -86,6 +86,9 @@ func main() {
 		r++
 
 		if *part == 2 {
+			if *debug {
+				fmt.Println("Step:", r)
+			}
 			if compareMoons(start, moons) {
 				fmt.Printf("Part two: %d\n", r)
 				break
