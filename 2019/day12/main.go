@@ -20,8 +20,56 @@ type moon struct {
 }
 
 func (m moon) String() string {
-	return fmt.Sprintf("Moon(pos=<x=%4d, y=%4d, z=%4d>, vel=<x=%4d, y=%4d, z=%4d>)",
+	return fmt.Sprintf("Moon(pos=<x=%4d, y=%4d, z=%4d>, vel=<x=%4d, y=%4d, z=%4d>)\n",
 		m.pos.x, m.pos.y, m.pos.z, m.vel.x, m.vel.y, m.vel.z)
+}
+
+type orbit struct {
+	currentState []moon
+	startState   []moon
+	rounds       int
+}
+
+func (o *orbit) step() {
+	for i := range o.currentState {
+		x, y, z := 0, 0, 0
+		for j := range o.currentState {
+			if o.currentState[i] == o.currentState[j] {
+				continue
+			}
+			if o.currentState[i].pos.x > o.currentState[j].pos.x {
+				x--
+			} else if o.currentState[i].pos.x < o.currentState[j].pos.x {
+				x++
+			}
+			if o.currentState[i].pos.y > o.currentState[j].pos.y {
+				y--
+			} else if o.currentState[i].pos.y < o.currentState[j].pos.y {
+				y++
+			}
+			if o.currentState[i].pos.z > o.currentState[j].pos.z {
+				z--
+			} else if o.currentState[i].pos.z < o.currentState[j].pos.z {
+				z++
+			}
+		}
+		o.currentState[i].vel.x += x
+		o.currentState[i].vel.y += y
+		o.currentState[i].vel.z += z
+	}
+	for i := range o.currentState {
+		o.currentState[i].pos.x += o.currentState[i].vel.x
+		o.currentState[i].pos.y += o.currentState[i].vel.y
+		o.currentState[i].pos.z += o.currentState[i].vel.z
+	}
+}
+
+func (o orbit) String() string {
+	var sb strings.Builder
+	for _, s := range o.currentState {
+		sb.WriteString(s.String())
+	}
+	return sb.String()
 }
 
 var debug = flag.Bool("debug", false, "Print debug info")
@@ -30,82 +78,65 @@ var rounds = flag.Int("rounds", 1000, "How many rounds to run")
 
 func main() {
 	flag.Parse()
-	moons := parseFile("./day12-example.txt")
+	moons := parseFile("./day12-input.txt")
 	start := make([]moon, len(moons))
 	copy(start, moons)
 
-	r := 0
+	orbit := orbit{
+		currentState: moons,
+		startState:   start,
+	}
+	stateMap := make(map[string]bool)
+	cycles := make([]int, 3)
+
+	numFound := 0
 	// Steps
 	for {
 		if *part == 1 && *debug {
-			fmt.Printf("After %d steps:\n", r)
-			for m := range moons {
-				fmt.Println(moons[m])
-			}
+			fmt.Printf("After %d steps:\n", orbit.rounds)
 		}
-		if *part == 1 && r == *rounds {
+		if *part == 1 && orbit.rounds == *rounds {
 			break
 		}
 
-		// 1. Apply gravity
-		//	- Change velocity of every pair of moon by +/- 1 for each axis
-		for i := range moons {
-			x, y, z := 0, 0, 0
-			for j := range moons {
-				if moons[i] == moons[j] {
-					continue
-				}
-				if moons[i].pos.x > moons[j].pos.x {
-					x--
-				} else if moons[i].pos.x < moons[j].pos.x {
-					x++
-				}
-				if moons[i].pos.y > moons[j].pos.y {
-					y--
-				} else if moons[i].pos.y < moons[j].pos.y {
-					y++
-				}
-				if moons[i].pos.z > moons[j].pos.z {
-					z--
-				} else if moons[i].pos.z < moons[j].pos.z {
-					z++
-				}
-			}
-			moons[i].vel.x += x
-			moons[i].vel.y += y
-			moons[i].vel.z += z
-		}
-		// 2. Apply velocity
-		//	- Change the position by the velocity calculated above
-		for i := range moons {
-			moons[i].pos.x += moons[i].vel.x
-			moons[i].pos.y += moons[i].vel.y
-			moons[i].pos.z += moons[i].vel.z
-		}
-
-		r++
-
 		if *part == 2 {
-			if *debug {
-				fmt.Println("Step:", r)
+			stateX := stateAxisX(orbit.currentState)
+			stateY := stateAxisY(orbit.currentState)
+			stateZ := stateAxisZ(orbit.currentState)
+			if !stateMap[stateX] {
+				stateMap[stateX] = true
+			} else if cycles[0] == 0 {
+				numFound++
+				cycles[0] = orbit.rounds
 			}
-			if compareMoons(start, moons) {
-				fmt.Printf("Part two: %d\n", r)
+			if !stateMap[stateY] {
+				stateMap[stateY] = true
+			} else if cycles[1] == 0 {
+				numFound++
+				cycles[1] = orbit.rounds
+			}
+			if !stateMap[stateZ] {
+				stateMap[stateZ] = true
+			} else if cycles[2] == 0 {
+				numFound++
+				cycles[2] = orbit.rounds
+			}
+
+			if numFound == 3 {
+				fmt.Println(h.LCM(cycles[0], cycles[1], cycles[2]))
 				break
 			}
 		}
+
+		orbit.step()
+		orbit.rounds++
 	}
 
-	// 3. Potential energy:
-	//	- Sum(abs(pos_x), abs(pos_y), abs(pos_z))...)
-	// 4. Kinetic energy
-	//	- Sum(abs(vel_x), abs(vel_y), abs(vel_z))...)
-	// 5. Total energy = potential * kinetic
 	if *part == 1 {
 		total := 0
-		for i := range moons {
-			pot := h.Abs(moons[i].pos.x) + h.Abs(moons[i].pos.y) + h.Abs(moons[i].pos.z)
-			kin := h.Abs(moons[i].vel.x) + h.Abs(moons[i].vel.y) + h.Abs(moons[i].vel.z)
+		for i := range orbit.currentState {
+			pot := h.Abs(orbit.currentState[i].pos.x) + h.Abs(orbit.currentState[i].pos.y) + h.Abs(orbit.currentState[i].pos.z)
+			kin := h.Abs(orbit.currentState[i].vel.x) + h.Abs(orbit.currentState[i].vel.y) + h.Abs(orbit.currentState[i].vel.z)
 			total += (pot * kin)
 		}
 		fmt.Println("Part one:", total)
@@ -156,4 +187,37 @@ func compareMoons(start, current []moon) bool {
 		}
 	}
 	return true
+}
+
+func stateAxisX(state []moon) string {
+	var sb strings.Builder
+	for i := range state {
+		s := fmt.Sprintf("X(pos=%d,vel=%d)",
+			state[i].pos.x,
+			state[i].vel.x)
+		sb.WriteString(s)
+	}
+	return sb.String()
+}
+
+func stateAxisY(state []moon) string {
+	var sb strings.Builder
+	for i := range state {
+		s := fmt.Sprintf("Y(pos=%d,vel=%d)",
+			state[i].pos.y,
+			state[i].vel.y)
+		sb.WriteString(s)
+	}
+	return sb.String()
+}
+
+func stateAxisZ(state []moon) string {
+	var sb strings.Builder
+	for i := range state {
+		s := fmt.Sprintf("Z(pos=%d,vel=%d)",
+			state[i].pos.z,
+			state[i].vel.z)
+		sb.WriteString(s)
+	}
+	return sb.String()
 }

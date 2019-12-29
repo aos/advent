@@ -24,6 +24,23 @@ func Abs(n int) int {
 	return n
 }
 
+// GCD finds the greatest common divisor of two integers
+func GCD(a, b int) int {
+	for b != 0 {
+		a, b = b, a%b
+	}
+	return a
+}
+
+// LCM finds the least common multiple of two or more integers
+func LCM(a, b int, xs ...int) int {
+	result := a * b / GCD(a, b)
+	for i := range xs {
+		result = LCM(result, xs[i])
+	}
+	return result
+}
+
 // SplitComma defines a custom SplitFunc for bufio.Scanner
 func SplitComma(data []byte, atEOF bool) (int, []byte, error) {
 	for i := 0; i < len(data); i++ {
