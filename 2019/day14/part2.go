@@ -1,3 +1,4 @@
+// Part 2
 package main
 
 func (t EleTotals) returnOre() int {

@@ -34,18 +34,18 @@ func NewTotals() EleTotals {
 }
 
 var file = flag.String("file", "ex1-31.txt", "Name of input file")
-var fuel = flag.Int("fuel", 1, "Num of fuel")
 
 func main() {
 	flag.Parse()
 	list := parseFile(*file)
 
 	// Part One
-	//totals := NewTotals()
-	//totals.getTotals(list, "FUEL", *fuel)
-	//fmt.Println("Part one:", totals["ORE"])
+	totals := NewTotals()
+	totals.getTotals(list, "FUEL", 1)
+	fmt.Println("Part one:", totals["ORE"])
 
-	fmt.Println(PartTwo(list, 1e12))
+	// Part Two
+	fmt.Println("Part two:", PartTwo(list, 1e12))
 }
 
 func (t EleTotals) getTotals(list map[string]ElementProps, ele string, amount int) {
