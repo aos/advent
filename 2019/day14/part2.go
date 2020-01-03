@@ -1,35 +1,19 @@
 // Part 2
 package main
 
-func (t EleTotals) returnOre() int {
-	ore := t["ORE"]
-	t["ORE"] = 0
-	return ore
-}
-
-func (t EleTotals) isInitial() bool {
-	for _, v := range t {
-		if v != 0 {
-			return false
-		}
-	}
-	return true
-}
-
-// PartTwo ...
+// PartTwo uses gradient descent to get to the correct amount of FUEL
 func PartTwo(list map[string]ElementProps, ore int) int {
-	t := NewTotals()
-	initialOre := ore
-	fuel := 0
+	minOre := getTotals(list, 1)
+	target := ore / minOre
+	usedOre := getTotals(list, target)
 
-	for ore > 0 {
-		t.getTotals(list, "FUEL", 1)
+	for {
+		target += (ore-usedOre)/minOre + 1
+		usedOre = getTotals(list, target)
 
-		fuel++
-		ore -= t.returnOre()
-		if t.isInitial() {
+		if usedOre > ore {
 			break
 		}
 	}
-	return (fuel * initialOre) / (initialOre - ore)
+	return target - 1
 }

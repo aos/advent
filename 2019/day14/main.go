@@ -25,14 +25,6 @@ type Ingredient struct {
 	name     string
 }
 
-// EleTotals represents the element totals
-type EleTotals map[string]int
-
-// NewTotals initializes an EleTotals map and returns it
-func NewTotals() EleTotals {
-	return make(EleTotals)
-}
-
 var file = flag.String("file", "ex1-31.txt", "Name of input file")
 
 func main() {
@@ -40,22 +32,20 @@ func main() {
 	list := parseFile(*file)
 
 	// Part One
-	totals := NewTotals()
-	totals.getTotals(list, "FUEL", 1)
-	fmt.Println("Part one:", totals["ORE"])
+	fmt.Println("Part one:", getTotals(list, 1))
 
 	// Part Two
 	fmt.Println("Part two:", PartTwo(list, 1e12))
 }
 
-func (t EleTotals) getTotals(list map[string]ElementProps, ele string, amount int) {
-	t[ele] = amount
+func getTotals(list map[string]ElementProps, amount int) int {
+	t := map[string]int{"FUEL": amount}
 	q := queue.NewQueue()
-	q.Put(ele)
+	q.Put("FUEL")
 
 	for q.Len() > 0 {
 		i, _ := q.Get()
-		ele = i.(string)
+		ele := i.(string)
 		ings, yield := list[ele].ings, list[ele].yield
 
 		if t[ele] > 0 {
@@ -75,6 +65,7 @@ func (t EleTotals) getTotals(list map[string]ElementProps, ele string, amount in
 		}
 
 	}
+	return t["ORE"]
 }
 
 func parseFile(f string) map[string]ElementProps {
