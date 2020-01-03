@@ -1,7 +1,16 @@
 package main
 
 import (
+	"aoc/helpers/geo"
 	"aoc/helpers/opcodes"
+	"fmt"
+)
+
+const (
+	north int = iota + 1
+	south
+	west
+	east
 )
 
 func main() {
@@ -20,8 +29,59 @@ func main() {
 
 	oc := opcodes.ReadOpcodesFromFile("input.txt")
 
-	in := make(chan int)
-	out, done := opcodes.OpcodeVM(oc, in)
+	in := make(chan int, 1)
+	out, _ := opcodes.OpcodeVM(oc, in)
+
+	visited := make(map[geo.Point]bool)
+	walls := make(map[geo.Point]bool)
+
+	in <- north
+	x, y := 25, 24
+	trace := []int{north}
+
+	for status := range out {
+		fmt.Printf("status: %d\n", status)
+		switch status {
+		case 0: // wall
+			walls[geo.Point{x, y}] = true
+
+		case 1: // moved
+			visited[geo.Point{x, y}] = true
+			x, y = move(north, x, y, in)
+
+		case 2: // arrived
+
+		}
+	}
+}
+
+func move(dir, curX, curY int, in chan int) (int, int) {
+	switch dir {
+	case north:
+		curY--
+	case south:
+		curY++
+	case west:
+		curX--
+	case east:
+		curX++
+	}
+	in <- dir
+	return curX, curY
+}
+
+func oppositeDir(dir int) int {
+	switch dir {
+	case north:
+		return south
+	case south:
+		return north
+	case west:
+		return east
+	case east:
+		return west
+	}
+	return 0
 }
 
 func draw() {
