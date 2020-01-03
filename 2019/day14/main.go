@@ -58,16 +58,22 @@ func (t EleTotals) getTotals(list map[string]ElementProps, ele string, amount in
 		ele = i.(string)
 		ings, yield := list[ele].ings, list[ele].yield
 
-		for t[ele] > 0 {
+		if t[ele] > 0 {
+			needed := t[ele] / yield
+			// Hacky int ciel
+			if t[ele]%yield > 0 {
+				needed++
+			}
 			for i := range ings {
-				t[ings[i].name] += ings[i].required
+				t[ings[i].name] += (ings[i].required * needed)
 
 				if ings[i].name != "ORE" {
 					q.Put(ings[i].name)
 				}
 			}
-			t[ele] -= yield
+			t[ele] -= (needed * yield)
 		}
+
 	}
 }
 
