@@ -24,7 +24,7 @@ func main() {
 
 	req, err := http.NewRequest(
 		"GET",
-		fmt.Sprintf("https://adventofcode.com/2019/day/%s/input",
+		fmt.Sprintf("https://adventofcode.com/2020/day/%s/input",
 			os.Args[1]),
 		nil)
 	if err != nil {
