@@ -33,24 +33,15 @@ fn main() -> std::io::Result<()> {
             valid += 1;
         }
     }
-
     println!("Part one: {}", valid);
 
     valid = 0;
     for line in &ls {
-        let mut match_once = false;
         let first = line.line.as_bytes()[line.min as usize - 1] as char;
         let second = line.line.as_bytes()[line.max as usize - 1] as char;
 
-        if first == line.chr || second == line.chr {
-            match_once = true;
-        }
-
-        if first == line.chr && second == line.chr {
-            match_once = false;
-        }
-
-        if match_once {
+        if (first == line.chr || second == line.chr) &&
+            !(first == line.chr && second == line.chr) {
             valid += 1;
         }
     }
