@@ -12,36 +12,36 @@ fn main() {
     let min = *input.iter().min().unwrap();
     let mut big = vec![false; max + 1];
 
-    for i in &input {
-        big[*i] = true;
+    for &i in &input {
+        big[i] = true;
     }
 
-    for i in &input {
-        let diff = SUM - *i;
+    for &i in &input {
+        let diff = SUM - i;
 
         if big[diff] {
-            println!("Part one: {} * {} = {}", *i, diff, *i * diff);
+            println!("Part one: {} * {} = {}", i, diff, i * diff);
             break;
         }
     }
 
-    for i in &input {
-        let diff = SUM - *i;
+    for &i in &input {
+        let diff = SUM - i;
 
         // skip if difference cannot be made up by more than 1 number
         if diff <= min {
             continue;
         }
 
-        for j in &input {
-            if *j >= diff {
+        for &j in &input {
+            if j >= diff {
                 continue;
             }
 
-            let second_diff = diff - *j;
+            let second_diff = diff - j;
 
             if big[second_diff] {
-                println!("Part two: {} * {} * {} = {}", *i, *j, second_diff, *i * *j * second_diff);
+                println!("Part two: {} * {} * {} = {}", i, j, second_diff, i * j * second_diff);
                 return;
             }
         }
