@@ -1,28 +1,44 @@
-use std::fs;
+use std::{env, fs};
 
-#[derive(Debug)]
-struct Point {
-    x: usize,
-    y: usize,
-    is_tree: bool,
-}
-
-// (x, y)
 struct Slope(usize, usize);
 
-fn main() {
-    let grid: Vec<Vec<Point>> = fs::read_to_string("example.txt").unwrap()
+fn main() -> std::io::Result<()> {
+    let args: Vec<String> = env::args().collect();
+    let filename = args.get(1).map_or("example.txt", |v| v);
+
+    let grid: Vec<Vec<usize>> = fs::read_to_string(filename)?
         .lines()
-        .enumerate()
-        .map(|(y, line)| parse_line(y, line))
+        .map(|line| parse_line(line))
         .collect();
 
-    let width = grid[0].len();
+    println!("Part one: {}", descend(&grid, Slope(3, 1)));
+
+    let part2 = vec![
+        Slope(1, 1),
+        Slope(3, 1),
+        Slope(5, 1),
+        Slope(7, 1),
+        Slope(1, 2)]
+            .into_iter()
+            .map(|s| descend(&grid, s))
+            .fold(1, |acc, x| acc * x);
+    println!("Part two: {}", part2);
+
+    Ok(())
 }
 
-fn parse_line(y: usize, line: &str) -> Vec<Point> {
+fn parse_line(line: &str) -> Vec<usize> {
     line
-        .char_indices()
-        .map(|(i, c)| Point { x: i, y, is_tree: c == '#' })
+        .chars()
+        .map(|c| if c == '#' { 1 } else { 0 })
         .collect()
+}
+
+fn descend(grid: &Vec<Vec<usize>>, slope: Slope) -> usize {
+    let width = grid[0].len();
+    grid
+        .iter()
+        .step_by(slope.1)
+        .enumerate()
+        .fold(0, |acc, (y, line)| acc + line[(slope.0 * y) % width])
 }
