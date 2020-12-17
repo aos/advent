@@ -1,4 +1,5 @@
 use std::{env, fs};
+use regex;
 
 #[derive(Debug, Default)]
 struct Passport {
@@ -24,6 +25,7 @@ fn main() -> std::io::Result<()> {
         .collect();
 
     println!("part one: {}", part1(&pps));
+    println!("part two: {}", part2(&pps));
 
     Ok(())
 }
@@ -68,6 +70,10 @@ fn part1(passports: &Vec<Passport>) -> usize {
 }
 
 fn part2(passports: &Vec<Passport>) -> usize {
+    let hcl_check = regex::Regex::new(r"#[0-9a-f]{6}").unwrap();
+    let ecl_check = regex::Regex::new(r"(amb|blu|brn|gry|grn|hzl|oth)").unwrap();
+    let pid_check = regex::Regex::new(r"^[0-9]{9}$").unwrap();
+
     passports
         .iter()
         .filter(|p| {
@@ -88,11 +94,50 @@ fn part2(passports: &Vec<Passport>) -> usize {
                 Passport {
                     byr, iyr, eyr, hgt, hcl, ecl, pid, ..
                 } => {
-                    match Some(byr).parse() {
+                    let mut valid = 0;
+                    valid += byr.as_ref()
+                        .unwrap()
+                        .parse::<usize>()
+                        .map_or(0, |n| if (1920..=2002).contains(&n) { 1 } else { 0 });
+                    valid += iyr.as_ref()
+                        .unwrap()
+                        .parse::<usize>()
+                        .map_or(0, |n| if (2010..=2020).contains(&n) { 1 } else { 0 });
+                    valid += eyr.as_ref()
+                        .unwrap()
+                        .parse::<usize>()
+                        .map_or(0, |n| if (2020..=2030).contains(&n) { 1 } else { 0 });
+                    valid += hgt.as_ref()
+                        .map_or(0, |h| {
+                            if h.ends_with("cm") {
+                                h.strip_suffix("cm")
+                                    .unwrap()
+                                    .parse::<usize>()
+                                    .map_or(0, |n| if (150..=193).contains(&n) { 1 } else { 0 })
+                            } else if h.ends_with("in") {
+                                h.strip_suffix("in")
+                                    .unwrap()
+                                    .parse::<usize>()
+                                    .map_or(0, |n| if (59..=76).contains(&n) { 1 } else { 0 })
+                            } else {
+                                0
+                            }
+                        });
+                    valid += hcl.as_ref()
+                        .map_or(0, |h| {
+                            if hcl_check.find_iter(&h).count() > 0 { 1 } else { 0 }
+                        });
+                    valid += ecl.as_ref()
+                        .map_or(0, |e| {
+                            if ecl_check.find_iter(&e).count() == 1 { 1 } else { 0 }
+                        });
+                    valid += pid.as_ref()
+                        .map_or(0, |p| {
+                            if pid_check.find_iter(&p).count() > 0 { 1 } else { 0 }
+                        });
 
-                    }
+                    valid == 7
                 },
-                _ => false
             }
         })
         .count()
