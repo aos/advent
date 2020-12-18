@@ -14,8 +14,7 @@ struct Passport {
 }
 
 fn main() -> std::io::Result<()> {
-    let args: Vec<String> = env::args().collect();
-    let filename = args.get(1).map_or("example.txt", |v| v);
+    let filename = env::args().nth(1).unwrap_or_else(|| "example.txt".into());
 
     let file = fs::read_to_string(filename)?;
     let pps: Vec<Passport> = file
@@ -31,9 +30,8 @@ fn main() -> std::io::Result<()> {
 }
 
 fn parse_passport(pass: &str) -> Passport {
-    pass.split(|c| c == '\n' || c == ' ')
-        .into_iter()
-        .map(|kv| kv.split(':').collect::<Vec<_>>())
+    pass.split_whitespace()
+        .map(|kv| kv.trim().split(':').collect::<Vec<_>>())
         .fold(Passport{ ..Default::default() }, |mut a, v| {
             match v[0] {
                 "byr" => a.byr = Some(v[1].to_string()),
