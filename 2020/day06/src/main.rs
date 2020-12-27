@@ -12,6 +12,15 @@ fn main() -> io::Result<()> {
     
     println!("Part one: {}", part1);
 
+    let part2: usize = file
+        .trim()
+        .split("\n\n")
+        .map(|g| create_sets(g))
+        .map(|set| set.len())
+        .sum();
+
+    println!("Part two: {}", part2);
+
     Ok(())
 }
 
@@ -22,6 +31,19 @@ fn count_group(group: &str) -> usize {
     h.len()
 }
 
+fn create_sets(group: &str) -> HashSet<char> {
+    let mut sets_iter = group
+        .split_whitespace()
+        .map(|a| {
+            let mut h: HashSet<char> = a.chars().collect();
+            h.remove(&'\n');
+            h
+        })
+        .into_iter();
+
+    sets_iter.next().map(|set| sets_iter.fold(set, |s1, s2| &s1 & &s2)).unwrap()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -30,13 +52,7 @@ mod tests {
 abcy
 abcz";
 
-    #[test]
-    fn test_count_group() {
-        let c = count_group(EX_1);
-        assert_eq!(c, 6);
-    }
-
-    const EX_2: &str = "abc
+const EX_2: &str = "abc
 
 a
 b
@@ -53,6 +69,12 @@ a
 b";
 
     #[test]
+    fn test_count_group() {
+        let c = count_group(EX_1);
+        assert_eq!(c, 6);
+    }
+
+    #[test]
     fn test_sum_example() {
         let d: usize = EX_2
             .trim()
@@ -60,5 +82,16 @@ b";
             .map(|g| count_group(g))
             .sum();
         assert_eq!(d, 11);
+    }
+
+    #[test]
+    fn test_intersection_sum() {
+        let d: usize = EX_2
+            .trim()
+            .split("\n\n")
+            .map(|g| create_sets(g))
+            .map(|set| set.len())
+            .sum();
+        assert_eq!(d, 6);
     }
 }
