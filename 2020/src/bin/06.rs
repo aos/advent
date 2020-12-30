@@ -3,7 +3,7 @@ use std::collections::HashSet;
 
 fn main() -> io::Result<()> {
 
-    let file = fs::read_to_string("input.txt")?;
+    let file = fs::read_to_string("input/day06_input.txt")?;
     let part1: usize = file
         .trim()
         .split("\n\n")

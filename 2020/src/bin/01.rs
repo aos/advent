@@ -3,7 +3,7 @@ use std::fs;
 const SUM: usize = 2020;
 
 fn main() {
-    let input: Vec<usize> = fs::read_to_string("input.txt").unwrap()
+    let input: Vec<usize> = fs::read_to_string("input/day01_input.txt").unwrap()
         .lines()
         .map(|l| l.parse().unwrap())
         .collect();

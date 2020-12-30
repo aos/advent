@@ -18,7 +18,7 @@ struct Line {
 }
 
 fn main() -> std::io::Result<()> {
-    let f = std::fs::File::open("input.txt")?;
+    let f = std::fs::File::open("input/day02_input.txt")?;
     let mut ls: Vec<Line> = vec![];
     let mut valid: u32 = 0;
 

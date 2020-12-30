@@ -4,7 +4,7 @@ struct Slope(usize, usize);
 
 fn main() -> std::io::Result<()> {
     let args: Vec<String> = env::args().collect();
-    let filename = args.get(1).map_or("example.txt", |v| v);
+    let filename = args.get(1).map_or("input/day03_example.txt", |v| v);
 
     let grid: Vec<Vec<usize>> = fs::read_to_string(filename)?
         .lines()

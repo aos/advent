@@ -14,7 +14,7 @@ struct Passport {
 }
 
 fn main() -> std::io::Result<()> {
-    let filename = env::args().nth(1).unwrap_or_else(|| "example.txt".into());
+    let filename = env::args().nth(1).unwrap_or_else(|| "input/day04_example.txt".into());
 
     let file = fs::read_to_string(filename)?;
     let pps: Vec<Passport> = file

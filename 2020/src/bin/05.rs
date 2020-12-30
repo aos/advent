@@ -1,7 +1,7 @@
 use std::{io, fs};
 
 fn main() -> io::Result<()> {
-    let file = fs::read_to_string("input.txt")?;
+    let file = fs::read_to_string("input/day05_input.txt")?;
     let input = file
         .trim()
         .split_whitespace();
@@ -25,6 +25,7 @@ fn decode_seat_alt(code: &str) -> u32 {
         })
 }
 
+#[allow(dead_code)]
 fn decode_seat(code: &str) -> u32 {
     let (row_code, col_code) = code.split_at(7);
     let (mut low, mut high) = (0u32, 127u32);
