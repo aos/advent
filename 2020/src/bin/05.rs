@@ -1,7 +1,7 @@
 use std::{io, fs};
 
 fn main() -> io::Result<()> {
-    let file = fs::read_to_string("input/day05_input.txt")?;
+    let file = fs::read_to_string("in/day05_input.txt")?;
     let input = file
         .trim()
         .split_whitespace();
@@ -71,19 +71,7 @@ fn decode_seat(code: &str) -> u32 {
 mod tests {
     use super::*;
 
-    macro_rules! decode_tests {
-        ($($func_name:ident, $name:ident: $value:expr,)*) => {
-            $(
-                #[test]
-                fn $name() {
-                    let (input, expected) = $value;
-                    assert_eq!(expected, $func_name(input));
-                }
-            )*
-        }
-    }
-
-    decode_tests! {
+    aoc2020::decode_tests! {
         decode_seat, ex_1: ("FBFBBFFRLR", 357),
         decode_seat, ex_2: ("BFFFBBFRRR", 567),
         decode_seat, ex_3: ("FFFBBBFRRR", 119),
