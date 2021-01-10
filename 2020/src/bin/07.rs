@@ -1,15 +1,15 @@
 use std::{io, fs};
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 use lazy_static:: lazy_static;
 use regex::Regex;
 
-#[derive(Debug, Eq, PartialEq)]
-struct InsideBags(u32, String);
+#[derive(Debug, Eq, PartialEq, Clone)]
+struct InnerBags(u32, String);
 
 fn main() -> io::Result<()> {
-    let mut rules: HashMap<String, Option<Vec<InsideBags>>> = HashMap::new();
-    let file = fs::read_to_string("in/input.txt")?;
+    let mut rules: HashMap<String, Option<Vec<InnerBags>>> = HashMap::new();
+    let file = fs::read_to_string("in/day07_input.txt")?;
 
     rules = file.trim()
         .split("\n")
@@ -19,10 +19,12 @@ fn main() -> io::Result<()> {
             acc
         });
 
+    println!("Part one: {}", part_1(&rules));
+
     Ok(())
 }
 
-fn parse_rule(inp: &str) -> (String, Option<Vec<InsideBags>>) {
+fn parse_rule(inp: &str) -> (String, Option<Vec<InnerBags>>) {
     lazy_static! {
         static ref BAG_REGEX: Regex = Regex::new(r"([0-9]+) (\w+ \w+) bags?\.?").unwrap();
     }
@@ -32,14 +34,14 @@ fn parse_rule(inp: &str) -> (String, Option<Vec<InsideBags>>) {
     if rule[1].contains("no other") {
         (rule[0].to_string(), None)
     } else {
-        let lfh: Vec<InsideBags> = rule[1]
+        let lfh: Vec<InnerBags> = rule[1]
             .split(",")
             .map(|others| {
                 match BAG_REGEX.captures(others) {
                     Some(caps) => {
                         let num: u32 = caps.get(1).unwrap().as_str().parse().unwrap();
                         let bags: String = caps.get(2).unwrap().as_str().into();
-                        InsideBags(num, bags)
+                        InnerBags(num, bags)
                     },
                     _ => unreachable!(),
                 }
@@ -49,9 +51,39 @@ fn parse_rule(inp: &str) -> (String, Option<Vec<InsideBags>>) {
     }
 }
 
+fn part_1(rules: &HashMap<String, Option<Vec<InnerBags>>>) -> u32 {
+    // Part 1: Basically we're just trying to find all nodes that
+    // eventually lead to "shiny gold" bag
+    // Can do a DFS and short-circuit?
+    let mut is_gold_container: HashSet<String> = HashSet::new();
+
+    rules.iter()
+        .for_each(|(bag_kind, maybe_bags)| {
+            if let Some(bags) = maybe_bags {
+                let mut to_visit: Vec<String> = bags.iter().cloned().map(|bags| bags.1).collect();
+                
+                while let Some(next) = to_visit.pop() {
+                    if next == "shiny gold" {
+                        is_gold_container.insert(bag_kind.to_string());
+                        continue;
+                    }
+
+                    if let Some(inside_bags) = rules.get(&next).unwrap() {
+                        to_visit.extend(inside_bags.iter().cloned().map(|bags| bags.1));
+                    }
+
+                }
+            }
+        });
+    
+    is_gold_container.len() as u32
+}
+
 mod test {
+    #[allow(unused_imports)]
     use super::*;
 
+    #[allow(dead_code)]
     const EX_RULES: &str = "light red bags contain 1 bright white bag, 2 muted yellow bags.
 dark orange bags contain 3 bright white bags, 4 muted yellow bags.
 bright white bags contain 1 shiny gold bag.
@@ -68,14 +100,14 @@ dotted black bags contain no other bags.
             "dark orange bags contain 3 bright white bags, 4 muted yellow bags.",
             ("dark orange".to_string(),
             Some(vec![
-                InsideBags(3, "bright white".to_string()),
-                InsideBags(4, "muted yellow".to_string())
+                InnerBags(3, "bright white".to_string()),
+                InnerBags(4, "muted yellow".to_string())
             ]))),
 
         parse_rule, ex_rule_2: (
             "bright white bags contain 1 shiny gold bag.",
             ("bright white".to_string(),
-            Some(vec![InsideBags(1, "shiny gold".to_string())]))),
+            Some(vec![InnerBags(1, "shiny gold".to_string())]))),
 
         parse_rule, ex_rule_3: (
             "faded blue bags contain no other bags.",
@@ -85,35 +117,35 @@ dotted black bags contain no other bags.
 
     #[test]
     fn test_example() {
-        let mut rules: HashMap<String, Option<Vec<InsideBags>>> = HashMap::new();
-        let mut required: HashMap<String, Option<Vec<InsideBags>>> = HashMap::new();
+        let mut rules: HashMap<String, Option<Vec<InnerBags>>> = HashMap::new();
+        let mut required: HashMap<String, Option<Vec<InnerBags>>> = HashMap::new();
 
         required.insert(
             "light red".into(),
-            Some(vec![InsideBags(1, "bright white".into()), InsideBags(2, "muted yellow".into())])
+            Some(vec![InnerBags(1, "bright white".into()), InnerBags(2, "muted yellow".into())])
         );
         required.insert(
             "dark orange".into(),
-            Some(vec![InsideBags(3, "bright white".into()), InsideBags(4, "muted yellow".into())])
+            Some(vec![InnerBags(3, "bright white".into()), InnerBags(4, "muted yellow".into())])
         );
         required.insert(
-            "bright white".into(), Some(vec![InsideBags(1, "shiny gold".into())])
+            "bright white".into(), Some(vec![InnerBags(1, "shiny gold".into())])
         );
         required.insert(
             "muted yellow".into(),
-            Some(vec![InsideBags(2, "shiny gold".into()), InsideBags(9, "faded blue".into())])
+            Some(vec![InnerBags(2, "shiny gold".into()), InnerBags(9, "faded blue".into())])
         );
         required.insert(
             "shiny gold".into(),
-            Some(vec![InsideBags(1, "dark olive".into()), InsideBags(2, "vibrant plum".into())])
+            Some(vec![InnerBags(1, "dark olive".into()), InnerBags(2, "vibrant plum".into())])
         );
         required.insert(
             "dark olive".into(),
-            Some(vec![InsideBags(3, "faded blue".into()), InsideBags(4, "dotted black".into())])
+            Some(vec![InnerBags(3, "faded blue".into()), InnerBags(4, "dotted black".into())])
         );
         required.insert(
             "vibrant plum".into(),
-            Some(vec![InsideBags(5, "faded blue".into()), InsideBags(6, "dotted black".into())])
+            Some(vec![InnerBags(5, "faded blue".into()), InnerBags(6, "dotted black".into())])
         );
         required.insert("faded blue".into(), None);
         required.insert("dotted black".into(), None);
@@ -127,6 +159,6 @@ dotted black bags contain no other bags.
                 acc
             });
 
-        assert_eq!(rules, required);
+        assert_eq!(part_1(&rules), 4);
     }
 }
