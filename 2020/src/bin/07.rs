@@ -20,6 +20,7 @@ fn main() -> io::Result<()> {
         });
 
     println!("Part one: {}", part_1(&rules));
+    println!("Part two: {}", part_2(&rules));
 
     Ok(())
 }
@@ -77,6 +78,25 @@ fn part_1(rules: &HashMap<String, Option<Vec<InnerBags>>>) -> u32 {
         });
     
     is_gold_container.len() as u32
+}
+
+fn part_2(rules: &HashMap<String, Option<Vec<InnerBags>>>) -> u32 {
+   let mut to_visit: Vec<InnerBags> = rules.get("shiny gold").unwrap().as_ref().unwrap().clone();
+   let mut total_bags = to_visit.iter().map(|bags| bags.0).fold(0, |a, c| a + c);
+
+   while let Some(next) = to_visit.pop() {
+       if let Some(inside_bags) = rules.get(&next.1).unwrap() {
+           total_bags = inside_bags.iter()
+               .map(|bags| bags.0)
+               .fold(total_bags, |a, c| a + (c * next.0));
+           let multiplied: Vec<InnerBags> = inside_bags.iter()
+               .map(|bags| InnerBags(next.0 * bags.0, bags.1.to_string()))
+               .collect();
+           to_visit.extend(multiplied);
+       }
+   }
+
+   total_bags
 }
 
 mod test {
@@ -160,5 +180,6 @@ dotted black bags contain no other bags.
             });
 
         assert_eq!(part_1(&rules), 4);
+        assert_eq!(part_2(&rules), 32);
     }
 }
