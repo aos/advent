@@ -99,11 +99,10 @@ fn part_2(rules: &HashMap<String, Option<Vec<InnerBags>>>) -> u32 {
    total_bags
 }
 
-mod test {
-    #[allow(unused_imports)]
+#[cfg(test)]
+mod tests {
     use super::*;
 
-    #[allow(dead_code)]
     const EX_RULES: &str = "light red bags contain 1 bright white bag, 2 muted yellow bags.
 dark orange bags contain 3 bright white bags, 4 muted yellow bags.
 bright white bags contain 1 shiny gold bag.

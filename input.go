@@ -40,6 +40,7 @@ func main() {
 	resp, err := client.Do(req)
 	if resp.StatusCode != 200 {
 		fmt.Printf("error: status code %d\n", resp.StatusCode)
+		fmt.Println(err)
 		os.Exit(1)
 	}
 	defer resp.Body.Close()
