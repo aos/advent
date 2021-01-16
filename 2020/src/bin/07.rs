@@ -1,7 +1,7 @@
-use std::{io, fs};
 use std::collections::{HashMap, HashSet};
+use std::{fs, io};
 
-use lazy_static:: lazy_static;
+use lazy_static::lazy_static;
 use regex::Regex;
 
 #[derive(Debug, Eq, PartialEq, Clone)]
@@ -11,7 +11,8 @@ fn main() -> io::Result<()> {
     let mut rules: HashMap<String, Option<Vec<InnerBags>>> = HashMap::new();
     let file = fs::read_to_string("in/day07_input.txt")?;
 
-    rules = file.trim()
+    rules = file
+        .trim()
         .split("\n")
         .map(|rule| parse_rule(rule))
         .fold(rules, |mut acc, r| {
@@ -37,15 +38,13 @@ fn parse_rule(inp: &str) -> (String, Option<Vec<InnerBags>>) {
     } else {
         let lfh: Vec<InnerBags> = rule[1]
             .split(",")
-            .map(|others| {
-                match BAG_REGEX.captures(others) {
-                    Some(caps) => {
-                        let num: u32 = caps.get(1).unwrap().as_str().parse().unwrap();
-                        let bags: String = caps.get(2).unwrap().as_str().into();
-                        InnerBags(num, bags)
-                    },
-                    _ => unreachable!(),
+            .map(|others| match BAG_REGEX.captures(others) {
+                Some(caps) => {
+                    let num: u32 = caps.get(1).unwrap().as_str().parse().unwrap();
+                    let bags: String = caps.get(2).unwrap().as_str().into();
+                    InnerBags(num, bags)
                 }
+                _ => unreachable!(),
             })
             .collect();
         (rule[0].to_string(), Some(lfh))
@@ -58,45 +57,45 @@ fn part_1(rules: &HashMap<String, Option<Vec<InnerBags>>>) -> u32 {
     // Can do a DFS and short-circuit?
     let mut is_gold_container: HashSet<String> = HashSet::new();
 
-    rules.iter()
-        .for_each(|(bag_kind, maybe_bags)| {
-            if let Some(bags) = maybe_bags {
-                let mut to_visit: Vec<String> = bags.iter().cloned().map(|bags| bags.1).collect();
-                
-                while let Some(next) = to_visit.pop() {
-                    if next == "shiny gold" {
-                        is_gold_container.insert(bag_kind.to_string());
-                        continue;
-                    }
+    rules.iter().for_each(|(bag_kind, maybe_bags)| {
+        if let Some(bags) = maybe_bags {
+            let mut to_visit: Vec<String> = bags.iter().cloned().map(|bags| bags.1).collect();
 
-                    if let Some(inside_bags) = rules.get(&next).unwrap() {
-                        to_visit.extend(inside_bags.iter().cloned().map(|bags| bags.1));
-                    }
+            while let Some(next) = to_visit.pop() {
+                if next == "shiny gold" {
+                    is_gold_container.insert(bag_kind.to_string());
+                    continue;
+                }
 
+                if let Some(inside_bags) = rules.get(&next).unwrap() {
+                    to_visit.extend(inside_bags.iter().cloned().map(|bags| bags.1));
                 }
             }
-        });
-    
+        }
+    });
+
     is_gold_container.len() as u32
 }
 
 fn part_2(rules: &HashMap<String, Option<Vec<InnerBags>>>) -> u32 {
-   let mut to_visit: Vec<InnerBags> = rules.get("shiny gold").unwrap().as_ref().unwrap().clone();
-   let mut total_bags = to_visit.iter().map(|bags| bags.0).fold(0, |a, c| a + c);
+    let mut to_visit: Vec<InnerBags> = rules.get("shiny gold").unwrap().as_ref().unwrap().clone();
+    let mut total_bags = to_visit.iter().map(|bags| bags.0).fold(0, |a, c| a + c);
 
-   while let Some(next) = to_visit.pop() {
-       if let Some(inside_bags) = rules.get(&next.1).unwrap() {
-           total_bags = inside_bags.iter()
-               .map(|bags| bags.0)
-               .fold(total_bags, |a, c| a + (c * next.0));
-           let multiplied: Vec<InnerBags> = inside_bags.iter()
-               .map(|bags| InnerBags(next.0 * bags.0, bags.1.to_string()))
-               .collect();
-           to_visit.extend(multiplied);
-       }
-   }
+    while let Some(next) = to_visit.pop() {
+        if let Some(inside_bags) = rules.get(&next.1).unwrap() {
+            total_bags = inside_bags
+                .iter()
+                .map(|bags| bags.0)
+                .fold(total_bags, |a, c| a + (c * next.0));
+            let multiplied: Vec<InnerBags> = inside_bags
+                .iter()
+                .map(|bags| InnerBags(next.0 * bags.0, bags.1.to_string()))
+                .collect();
+            to_visit.extend(multiplied);
+        }
+    }
 
-   total_bags
+    total_bags
 }
 
 #[cfg(test)]
@@ -141,30 +140,49 @@ dotted black bags contain no other bags.
 
         required.insert(
             "light red".into(),
-            Some(vec![InnerBags(1, "bright white".into()), InnerBags(2, "muted yellow".into())])
+            Some(vec![
+                InnerBags(1, "bright white".into()),
+                InnerBags(2, "muted yellow".into()),
+            ]),
         );
         required.insert(
             "dark orange".into(),
-            Some(vec![InnerBags(3, "bright white".into()), InnerBags(4, "muted yellow".into())])
+            Some(vec![
+                InnerBags(3, "bright white".into()),
+                InnerBags(4, "muted yellow".into()),
+            ]),
         );
         required.insert(
-            "bright white".into(), Some(vec![InnerBags(1, "shiny gold".into())])
+            "bright white".into(),
+            Some(vec![InnerBags(1, "shiny gold".into())]),
         );
         required.insert(
             "muted yellow".into(),
-            Some(vec![InnerBags(2, "shiny gold".into()), InnerBags(9, "faded blue".into())])
+            Some(vec![
+                InnerBags(2, "shiny gold".into()),
+                InnerBags(9, "faded blue".into()),
+            ]),
         );
         required.insert(
             "shiny gold".into(),
-            Some(vec![InnerBags(1, "dark olive".into()), InnerBags(2, "vibrant plum".into())])
+            Some(vec![
+                InnerBags(1, "dark olive".into()),
+                InnerBags(2, "vibrant plum".into()),
+            ]),
         );
         required.insert(
             "dark olive".into(),
-            Some(vec![InnerBags(3, "faded blue".into()), InnerBags(4, "dotted black".into())])
+            Some(vec![
+                InnerBags(3, "faded blue".into()),
+                InnerBags(4, "dotted black".into()),
+            ]),
         );
         required.insert(
             "vibrant plum".into(),
-            Some(vec![InnerBags(5, "faded blue".into()), InnerBags(6, "dotted black".into())])
+            Some(vec![
+                InnerBags(5, "faded blue".into()),
+                InnerBags(6, "dotted black".into()),
+            ]),
         );
         required.insert("faded blue".into(), None);
         required.insert("dotted black".into(), None);

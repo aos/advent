@@ -1,15 +1,10 @@
-use std::{io, fs};
 use std::collections::HashSet;
+use std::{fs, io};
 
 fn main() -> io::Result<()> {
-
     let file = fs::read_to_string("in/day06_input.txt")?;
-    let part1: usize = file
-        .trim()
-        .split("\n\n")
-        .map(|g| count_group(g))
-        .sum();
-    
+    let part1: usize = file.trim().split("\n\n").map(|g| count_group(g)).sum();
+
     println!("Part one: {}", part1);
 
     let part2: usize = file
@@ -41,7 +36,10 @@ fn create_sets(group: &str) -> HashSet<char> {
         })
         .into_iter();
 
-    sets_iter.next().map(|set| sets_iter.fold(set, |s1, s2| &s1 & &s2)).unwrap()
+    sets_iter
+        .next()
+        .map(|set| sets_iter.fold(set, |s1, s2| &s1 & &s2))
+        .unwrap()
 }
 
 #[cfg(test)]
@@ -52,7 +50,7 @@ mod tests {
 abcy
 abcz";
 
-const EX_2: &str = "abc
+    const EX_2: &str = "abc
 
 a
 b
@@ -76,11 +74,7 @@ b";
 
     #[test]
     fn test_sum_example() {
-        let d: usize = EX_2
-            .trim()
-            .split("\n\n")
-            .map(|g| count_group(g))
-            .sum();
+        let d: usize = EX_2.trim().split("\n\n").map(|g| count_group(g)).sum();
         assert_eq!(d, 11);
     }
 

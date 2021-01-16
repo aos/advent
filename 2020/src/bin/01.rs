@@ -3,7 +3,8 @@ use std::fs;
 const SUM: usize = 2020;
 
 fn main() {
-    let input: Vec<usize> = fs::read_to_string("in/day01_input.txt").unwrap()
+    let input: Vec<usize> = fs::read_to_string("in/day01_input.txt")
+        .unwrap()
         .lines()
         .map(|l| l.parse().unwrap())
         .collect();
@@ -41,7 +42,13 @@ fn main() {
             let second_diff = diff - j;
 
             if big[second_diff] {
-                println!("Part two: {} * {} * {} = {}", i, j, second_diff, i * j * second_diff);
+                println!(
+                    "Part two: {} * {} * {} = {}",
+                    i,
+                    j,
+                    second_diff,
+                    i * j * second_diff
+                );
                 return;
             }
         }

@@ -5,9 +5,9 @@
 //  1-3 b: cdefg
 //  2-9 c: ccccccccc
 
-use std::io::{Error, ErrorKind, BufRead, BufReader};
-use regex::Regex;
 use lazy_static::lazy_static;
+use regex::Regex;
+use std::io::{BufRead, BufReader, Error, ErrorKind};
 
 #[derive(Debug)]
 struct Line {
@@ -40,8 +40,7 @@ fn main() -> std::io::Result<()> {
         let first = line.line.as_bytes()[line.min as usize - 1] as char;
         let second = line.line.as_bytes()[line.max as usize - 1] as char;
 
-        if (first == line.chr || second == line.chr) &&
-            !(first == line.chr && second == line.chr) {
+        if (first == line.chr || second == line.chr) && !(first == line.chr && second == line.chr) {
             valid += 1;
         }
     }
@@ -54,8 +53,18 @@ fn parse_line(line: String) -> Result<Line, Error> {
         static ref RE: Regex = Regex::new(r"(\d+)-(\d+) ([[:alpha:]]): (.+)").unwrap();
     }
     let caps = RE.captures(&line).unwrap();
-    let min: u32 = caps.get(1).unwrap().as_str().parse().map_err(|e| Error::new(ErrorKind::InvalidData, e))?;
-    let max: u32 = caps.get(2).unwrap().as_str().parse().map_err(|e| Error::new(ErrorKind::InvalidData, e))?;
+    let min: u32 = caps
+        .get(1)
+        .unwrap()
+        .as_str()
+        .parse()
+        .map_err(|e| Error::new(ErrorKind::InvalidData, e))?;
+    let max: u32 = caps
+        .get(2)
+        .unwrap()
+        .as_str()
+        .parse()
+        .map_err(|e| Error::new(ErrorKind::InvalidData, e))?;
     let c: char = caps.get(3).unwrap().as_str().chars().next().unwrap();
     let line = caps.get(4).unwrap().as_str().to_string();
 

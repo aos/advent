@@ -3,7 +3,8 @@ fn main() {
     let z: Vec<_> = f.lines().collect();
     println!("{:?}", z);
 
-    let y: Vec<_> = z.iter()
+    let y: Vec<_> = z
+        .iter()
         .map(|o| {
             let t: Vec<&str> = o.splitn(2, " ").collect();
             println!("{:?}", t);

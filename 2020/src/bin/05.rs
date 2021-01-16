@@ -1,28 +1,35 @@
-use std::{io, fs};
+use std::{fs, io};
 
 fn main() -> io::Result<()> {
     let file = fs::read_to_string("in/day05_input.txt")?;
-    let input = file
-        .trim()
-        .split_whitespace();
+    let input = file.trim().split_whitespace();
 
-    println!("Part 1: {}", input.clone().map(|code| decode_seat_alt(code)).max().unwrap());
+    println!(
+        "Part 1: {}",
+        input
+            .clone()
+            .map(|code| decode_seat_alt(code))
+            .max()
+            .unwrap()
+    );
 
     let mut d: Vec<_> = input.map(|code| decode_seat_alt(code)).collect();
     d.sort();
-    let (down, _) = d.iter().zip(d.clone().into_iter().skip(1))
+    let (down, _) = d
+        .iter()
+        .zip(d.clone().into_iter().skip(1))
         .filter(|&(a, b)| b != a + 1)
-        .next().unwrap();
+        .next()
+        .unwrap();
     println!("Part 2: {}", down + 1);
 
     Ok(())
 }
 
 fn decode_seat_alt(code: &str) -> u32 {
-    code.chars()
-        .fold(0u32, |acc, half| {
-            (acc << 1) | if matches!(half, 'B' | 'R') { 1 } else { 0 }
-        })
+    code.chars().fold(0u32, |acc, half| {
+        (acc << 1) | if matches!(half, 'B' | 'R') { 1 } else { 0 }
+    })
 }
 
 #[allow(dead_code)]
@@ -31,39 +38,33 @@ fn decode_seat(code: &str) -> u32 {
     let (mut low, mut high) = (0u32, 127u32);
     let mut last_row = 0u32;
 
-    row_code.chars()
-        .for_each(|c| {
-            match c {
-                'F' => {
-                    high = ((high - low) / 2) + low;
-                    last_row = low;
-                }
-                'B' => {
-                    low = ((high - low) / 2) + low + 1;
-                    last_row = high;
-                }
-                _ => ()
-            }            
-        });
+    row_code.chars().for_each(|c| match c {
+        'F' => {
+            high = ((high - low) / 2) + low;
+            last_row = low;
+        }
+        'B' => {
+            low = ((high - low) / 2) + low + 1;
+            last_row = high;
+        }
+        _ => (),
+    });
 
     low = 0u32;
     high = 7u32;
     let mut id = 0u32;
 
-    col_code.chars()
-        .for_each(|c| {
-            match c {
-                'L' => {
-                    high = ((high - low) / 2) + low;
-                    id = last_row * 8 + low;
-                }
-                'R' => {
-                    low = ((high - low) / 2) + low + 1;
-                    id = last_row * 8 + high;
-                }
-                _ => ()
-            }
-        });
+    col_code.chars().for_each(|c| match c {
+        'L' => {
+            high = ((high - low) / 2) + low;
+            id = last_row * 8 + low;
+        }
+        'R' => {
+            low = ((high - low) / 2) + low + 1;
+            id = last_row * 8 + high;
+        }
+        _ => (),
+    });
     id
 }
 
