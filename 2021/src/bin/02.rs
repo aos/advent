@@ -2,29 +2,44 @@ type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 
 fn main() -> Result<()> {
     let input = include_str!("../../in/day02_in.txt");
+    println!("part 1: {}", run(input, false));
+    println!("part 2: {:?}", run(input, true));
 
-    let (h, d) = run(input);
-    println!("{:?}", h * d);
-    
     Ok(())
 }
 
-fn run(input: &str) -> (usize, usize) {
-    input.lines().fold((0, 0), |acc, comm| {
-        let split = comm.split(" ").collect::<Vec<&str>>();
-        match split[0] {
-            "forward" => {
-                (acc.0 + split[1].parse::<usize>().unwrap(), acc.1)
-            },
-            "up" => {
-                (acc.0, acc.1 - split[1].parse::<usize>().unwrap())
-            },
-            "down" => {
-                (acc.0, acc.1 + split[1].parse::<usize>().unwrap())
+// (forward, depth, aim)
+fn run(input: &str, aim: bool) -> usize {
+    let (h, d, _) = input.lines()
+        .map(|l| l.split_once(" ").unwrap())
+        .fold((0, 0, 0), |(f, d, a), (k, v)| {
+            match (k, v.parse::<usize>().unwrap()) {
+                ("forward", v) => {
+                    if aim {
+                        (f + v, d + a * v, a)
+                    } else {
+                        (f + v, d, a)
+                    }
+                }
+                ("up", v) => {
+                    if aim {
+                        (f, d, a - v)
+                    } else {
+                        (f, d - v, a)
+                    }
+                }
+                ("down", v) => {
+                    if aim {
+                        (f, d, a + v)
+                    } else {
+                        (f, d + v, a)
+                    }
+                }
+                _ => unreachable!(),
             }
-            _ => unreachable!(),
-        }
-    })
+        });
+
+    h * d
 }
 
 #[cfg(test)]
@@ -40,6 +55,11 @@ forward 2";
 
     #[test]
     fn example_1() {
-        assert_eq!(run(EX), (15, 10));
+        assert_eq!(run(EX, false), 150);
+    }
+
+    #[test]
+    fn example_2() {
+        assert_eq!(run(EX, true), 900);
     }
 }
