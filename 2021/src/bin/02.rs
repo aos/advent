@@ -1,43 +1,38 @@
-type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
-
-fn main() -> Result<()> {
+fn main() {
     let input = include_str!("../../in/day02_in.txt");
     println!("part 1: {}", run(input, false));
     println!("part 2: {:?}", run(input, true));
-
-    Ok(())
 }
 
 // (forward, depth, aim)
 fn run(input: &str, aim: bool) -> usize {
-    let (h, d, _) = input.lines()
-        .map(|l| l.split_once(" ").unwrap())
-        .fold((0, 0, 0), |(f, d, a), (k, v)| {
-            match (k, v.parse::<usize>().unwrap()) {
-                ("forward", v) => {
-                    if aim {
-                        (f + v, d + a * v, a)
-                    } else {
-                        (f + v, d, a)
-                    }
+    let (h, d, _) = input.lines().map(|l| l.split_once(" ").unwrap()).fold(
+        (0, 0, 0),
+        |(f, d, a), (k, v)| match (k, v.parse::<usize>().unwrap()) {
+            ("forward", v) => {
+                if aim {
+                    (f + v, d + a * v, a)
+                } else {
+                    (f + v, d, a)
                 }
-                ("up", v) => {
-                    if aim {
-                        (f, d, a - v)
-                    } else {
-                        (f, d - v, a)
-                    }
-                }
-                ("down", v) => {
-                    if aim {
-                        (f, d, a + v)
-                    } else {
-                        (f, d + v, a)
-                    }
-                }
-                _ => unreachable!(),
             }
-        });
+            ("up", v) => {
+                if aim {
+                    (f, d, a - v)
+                } else {
+                    (f, d - v, a)
+                }
+            }
+            ("down", v) => {
+                if aim {
+                    (f, d, a + v)
+                } else {
+                    (f, d + v, a)
+                }
+            }
+            _ => unreachable!(),
+        },
+    );
 
     h * d
 }
