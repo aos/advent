@@ -6,11 +6,10 @@ fn main() -> Result<()> {
     let mut wins = vec![];
 
     for num in draw {
-        mark(num, &mut boards);
-
-        let c = count_won_board(&mut boards);
-        if c != 0 {
-            wins.push(num * c);
+        for board in boards.iter_mut().filter(|b| !b.won) {
+            if board.mark_check_win(num) {
+                wins.push(num * board.sum_unmarked());
+            }
         }
     }
 
@@ -30,12 +29,51 @@ struct Board {
     won: bool,
 }
 
+impl Board {
+    fn mark_check_win(&mut self, num: u32) -> bool {
+        for line in &mut self.nums {
+            for n in line {
+                if num == n.n {
+                    n.marked = true;
+                }
+            }
+        }
+
+        let nums_len = self.nums.len();
+        for x in 0..nums_len {
+            let mut count_x = 0;
+            let mut count_y = 0;
+            for y in 0..nums_len {
+                if self.nums[x][y].marked {
+                    count_x += 1;
+                }
+
+                if self.nums[y][x].marked {
+                    count_y += 1;
+                }
+            }
+
+            if count_x == nums_len || count_y == nums_len {
+                self.won = true;
+            }
+        }
+
+        self.won
+    }
+
+    fn sum_unmarked(&self) -> u32 {
+        self.nums.iter().fold(0u32, |count, nums| {
+            count + nums.iter().filter(|n| !n.marked).map(|n| n.n).sum::<u32>()
+        })
+    }
+}
+
 fn parse(input: &str) -> Result<(Vec<u32>, Vec<Board>)> {
     let (draw, boards) = input.split_once("\n\n").ok_or("no lines")?;
     let draw = draw
         .split(",")
-        .map(|n| n.parse())
-        .collect::<std::result::Result<Vec<u32>, _>>()?;
+        .map(|n| Ok(n.parse()?))
+        .collect::<Result<_>>()?;
 
     let boards: Vec<Board> = boards
         .split("\n\n")
@@ -64,63 +102,28 @@ fn parse(input: &str) -> Result<(Vec<u32>, Vec<Board>)> {
     Ok((draw, boards))
 }
 
-fn mark(num: u32, boards: &mut Vec<Board>) {
-    for board in boards {
-        for line in &mut board.nums {
-            for n in line {
-                if num == n.n {
-                    n.marked = true;
-                }
+impl std::fmt::Debug for Board {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut s = String::new();
+        for line in &self.nums {
+            for num in line {
+                s.push_str(&format!("{:?}", num));
             }
+            s.push('\n');
         }
+
+        write!(f, "{}", s)
     }
 }
 
-fn count_won_board(boards: &mut Vec<Board>) -> u32 {
-    for board in boards {
-        if board.won {
-            continue;
-        };
-
-        let nums_len = board.nums.len();
-        // horizontal
-        for x in 0..nums_len {
-            let mut count = 0;
-            for y in 0..nums_len {
-                if board.nums[x][y].marked {
-                    count += 1;
-                }
-            }
-
-            if count == nums_len {
-                board.won = true;
-                return count_unmarked(&board);
-            }
-        }
-
-        // vertical
-        for y in 0..nums_len {
-            let mut count = 0;
-            for x in 0..nums_len {
-                if board.nums[x][y].marked {
-                    count += 1;
-                }
-            }
-
-            if count == nums_len {
-                board.won = true;
-                return count_unmarked(&board);
-            }
+impl std::fmt::Debug for Num {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        if self.marked {
+            f.write_fmt(format_args!("{:>3}", "X"))
+        } else {
+            f.write_fmt(format_args!("{:>3}", self.n))
         }
     }
-
-    0
-}
-
-fn count_unmarked(board: &Board) -> u32 {
-    board.nums.iter().fold(0u32, |count, nums| {
-        count + nums.iter().filter(|n| !n.marked).map(|n| n.n).sum::<u32>()
-    })
 }
 
 #[cfg(test)]
@@ -150,16 +153,16 @@ mod tests {
     #[test]
     fn example_1() {
         let (draw, mut boards) = parse(EX).unwrap();
+        let mut wins = vec![];
 
         for num in draw {
-            mark(num, &mut boards);
-
-            let c = count_won_board(&mut boards);
-            if c != 0 {
-                assert_eq!(c * num, 4512);
-                break;
+            for board in boards.iter_mut().filter(|b| !b.won) {
+                if board.mark_check_win(num) {
+                    wins.push(num * board.sum_unmarked());
+                }
             }
         }
+        assert_eq!(*wins.iter().next().unwrap(), 4512);
     }
 
     #[test]
@@ -168,14 +171,12 @@ mod tests {
         let mut wins = vec![];
 
         for num in draw {
-            mark(num, &mut boards);
-
-            let c = count_won_board(&mut boards);
-            if c != 0 {
-                wins.push(num * c);
+            for board in boards.iter_mut().filter(|b| !b.won) {
+                if board.mark_check_win(num) {
+                    wins.push(num * board.sum_unmarked());
+                }
             }
         }
-
         assert_eq!(*wins.iter().last().unwrap(), 1924);
     }
 }
