@@ -6,20 +6,39 @@ fn main() -> Result<()> {
     Ok(())
 }
 
-fn parse(input: &str) {
+fn parse(input: &str) -> Vec<(Point, Point)> {
     input
         .lines()
         .map(|line| line.split_once(" -> ").unwrap())
-        .map(|(f, l)| {
-            let (first, last
-            Point {
-                x: f.);
+        .map(|(first, last)| {
+            let (fx, fy) = first.split_once(",").unwrap();
+            let (lx, ly) = last.split_once(",").unwrap();
+            (
+                Point {
+                    x: fx.parse().unwrap(),
+                    y: fy.parse().unwrap(),
+                    covered: 0,
+                },
+                Point {
+                    x: lx.parse().unwrap(),
+                    y: ly.parse().unwrap(),
+                    covered: 0,
+                },
+            )
+        })
+        .collect()
 }
 
+fn draw(points: &mut Vec<(Point, Point)>) {
+    for (first, last) in points {
+    }
+}
+
+#[derive(Debug)]
 struct Point {
     x: u32,
     y: u32,
-    covers: u32,
+    covered: u32,
 }
 
 #[cfg(test)]
@@ -39,7 +58,8 @@ mod tests {
 
     #[test]
     fn part_1() {
-        println!("{}", EX);
+        let x = parse(EX);
+        println!("{:?}", x);
         assert_eq!(0, 0);
     }
 }
