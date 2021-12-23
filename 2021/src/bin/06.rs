@@ -2,11 +2,9 @@ use aoc2021::Result;
 
 fn main() -> Result<()> {
     let initial = include_str!("../../in/day06_in.txt");
-    let mut fish = parse_input(initial)?;
-    for _ in 0..80 {
-        simulate(&mut fish);
-    }
-    println!("part 1: {}", fish.len());
+    let fish = parse_input(initial)?;
+    println!("part 1: {}", simulate(&fish, 80));
+    println!("part 2: {}", simulate(&fish, 256));
 
     Ok(())
 }
@@ -15,19 +13,14 @@ fn parse_input(input: &str) -> Result<Vec<usize>> {
     input.trim().split(",").map(|n| Ok(n.parse()?)).collect()
 }
 
-fn simulate(fish: &mut Vec<usize>) {
-    let mut x = vec![];
+fn simulate(fish: &Vec<usize>, days: usize) -> usize {
+    let mut schools = fish.iter().fold([0; 9], |mut school, &x| {
+        school[x] += 1;
+        school
+    });
+    (0..days).for_each(|i| schools[(i + 7) % 9] += schools[i % 9]);
 
-    for f in fish {
-        if *f == 0 {
-            *f = 6;
-            x.push(8);
-        } else {
-            *f -= 1;
-        }
-    }
-
-    fish.extend(x);
+    schools.iter().sum()
 }
 
 #[cfg(test)]
@@ -38,19 +31,22 @@ mod tests {
 
     #[test]
     fn example_1() {
-        let mut fish = parse_input(EX).unwrap();
-        for _ in 0..18 {
-            fish = simulate(fish);
-        }
-        assert_eq!(fish.len(), 26);
+        let fish = parse_input(EX).unwrap();
+        let count = simulate(&fish, 18);
+        assert_eq!(count, 26);
     }
 
     #[test]
     fn example_2() {
-        let mut fish = parse_input(EX).unwrap();
-        for _ in 0..256 {
-            fish = simulate(fish);
-        }
-        assert_eq!(fish.len(), 26984457539);
+        let fish = parse_input(EX).unwrap();
+        let count = simulate(&fish, 80);
+        assert_eq!(count, 5934);
+    }
+
+    #[test]
+    fn example_3() {
+        let fish = parse_input(EX).unwrap();
+        let count = simulate(&fish, 256);
+        assert_eq!(count, 26_984_457_539);
     }
 }
