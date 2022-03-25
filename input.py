@@ -2,7 +2,6 @@
 
 import json
 import sys
-import urllib
 import urllib.request
 
 def main(*args, **kwargs):
