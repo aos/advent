@@ -6,14 +6,22 @@ defmodule Aoc2023.Day02 do
     |> String.split("\n", trim: true)
     |> Enum.map(&parse_game/1)
     |> Enum.with_index()
-    |> Enum.filter(fn {x, _idx} ->
+    |> Enum.filter(fn {%{red: r, blue: b, green: g}, _idx} ->
       not Enum.any?([
-        12 - x[:red] < 0,
-        14 - x[:blue] < 0,
-        13 - x[:green] < 0
+        12 - r < 0,
+        13 - g < 0,
+        14 - b < 0
       ])
     end)
-    |> Enum.reduce(0, fn {_x, idx}, acc -> acc + 1 + idx end)
+    |> Enum.reduce(0, fn {_x, idx}, acc -> acc + idx + 1 end)
+  end
+
+  def part2(input) do
+    input
+    |> String.split("\n", trim: true)
+    |> Enum.map(&parse_game/1)
+    |> Enum.map(fn %{red: r, blue: b, green: g} -> r * g * b end)
+    |> Enum.sum()
   end
 
   def example_1 do
@@ -47,4 +55,6 @@ Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green"
       updated
     end)
   end
+
+  # Next time use tuples {r, g, b} instead of a map
 end
