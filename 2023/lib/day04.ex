@@ -9,7 +9,7 @@ defmodule Aoc2023.Day04 do
     |> Enum.map(fn s -> String.split(s) |> MapSet.new() end)
     |> Enum.chunk_every(2)
     |> Enum.reduce([], fn [winning, owned], acc ->
-      [ MapSet.intersection(winning, owned) | acc ]
+      [MapSet.intersection(winning, owned) | acc]
     end)
     |> Enum.reject(fn ms -> MapSet.size(ms) == 0 end)
     |> Enum.map(fn ms -> 2 ** (MapSet.size(ms) - 1) end)
@@ -17,12 +17,36 @@ defmodule Aoc2023.Day04 do
   end
 
   def part2(input) do
-    input
-    |> parse_input()
-    |> Enum.reject(fn x -> String.contains?(x, "Card") end)
-    |> Enum.map(&map_card_size/1)
-    # |> Enum.with_index()
-    # |> Enum.map(fn {s, i} -> {map_card_size(s), i + 1} end)
+    winning_hands =
+      input
+      |> parse_input()
+      |> Enum.reject(fn x -> String.contains?(x, "Card") end)
+      |> Enum.map(&map_card_size/1)
+
+    starting_copies =
+      winning_hands
+      |> Enum.with_index()
+      |> Map.new(fn {_w, i} -> {i, 1} end)
+
+    # [ 4, 2, 2, 1, 0, 0 ]
+    # %{ 0 => 1, 1 => 1, ... }
+    winning_hands
+    |> Enum.with_index()
+    |> Enum.reduce(
+      starting_copies,
+      fn {w, i}, acc ->
+        num = Map.fetch!(acc, i)
+
+        if w > 0 do
+          Enum.each((i + 1)..(i + w - 1), fn s ->
+            Map.update!(acc, s, fn existing -> num + existing end)
+            acc
+          end)
+        end
+
+        acc
+      end
+    )
   end
 
   def map_card_size(card) do
@@ -31,17 +55,12 @@ defmodule Aoc2023.Day04 do
     |> Enum.map(fn s -> String.split(s) |> MapSet.new() end)
     |> Enum.chunk_every(2)
     |> Enum.reduce([], fn [winning, owned], acc ->
-      [ MapSet.intersection(winning, owned) | acc ]
+      [MapSet.intersection(winning, owned) | acc]
     end)
     |> Enum.map(fn ms -> MapSet.size(ms) end)
     |> Enum.sum()
   end
 
-  # 1: [ 4, 2, 2, 1, 0, 0 ]
-  # -> [ 2, 2, 1, 0 ]
-  # --> [ 2, 2 ]
-  # ---> 
-  # 2: [ 2, 1 ]
   def process_card(card) do
     if card == 0 do
     else
@@ -51,7 +70,7 @@ defmodule Aoc2023.Day04 do
   def parse_input(input) do
     input
     |> String.split("\n", trim: true)
-    |> Enum.flat_map(&(String.split(&1, ": ", trim: true)))
+    |> Enum.flat_map(&String.split(&1, ": ", trim: true))
   end
 
   def example1() do
