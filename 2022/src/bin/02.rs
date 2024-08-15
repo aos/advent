@@ -23,8 +23,7 @@ fn count_total_score(inp: &str, part: usize) -> usize {
                     "Y" => {
                         if part == 1 {
                             score += 2;
-                        }
-                        else {
+                        } else {
                             score += 3;
                         }
                     }
@@ -40,57 +39,57 @@ fn count_total_score(inp: &str, part: usize) -> usize {
                 match (opp, me) {
                     ("A", "X") => {
                         score += 3;
-                    },
+                    }
                     ("A", "Y") => {
                         if part == 1 {
                             score += 6;
                         } else {
                             score += 1;
                         }
-                    },
+                    }
                     ("A", "Z") => {
                         if part == 2 {
                             score += 2;
                         }
-                    },
+                    }
                     ("B", "X") => {
                         if part == 2 {
                             score += 1;
                         }
-                    },
+                    }
                     ("B", "Y") => {
                         if part == 1 {
                             score += 3;
                         } else {
                             score += 2;
                         }
-                    },
+                    }
                     ("B", "Z") => {
                         if part == 1 {
                             score += 6;
                         } else {
                             score += 3;
                         }
-                    },
+                    }
                     ("C", "X") => {
                         if part == 1 {
                             score += 6;
                         } else {
                             score += 2;
                         }
-                    },
+                    }
                     ("C", "Y") => {
                         if part == 2 {
                             score += 3;
                         }
-                    },
+                    }
                     ("C", "Z") => {
                         if part == 1 {
                             score += 3;
                         } else {
                             score += 1;
                         }
-                    },
+                    }
                     (_, _) => (),
                 }
             }

@@ -18,7 +18,7 @@ fn count_top_cals(inp: &str, num: usize) -> usize {
             Err(_) => {
                 totals.push(curr);
                 curr = 0;
-            },
+            }
         }
     }
 

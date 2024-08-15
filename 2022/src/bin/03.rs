@@ -11,20 +11,19 @@ fn main() -> Result<(), Box<dyn Error>> {
 }
 
 fn get_priority(inp: &str) -> usize {
-    inp.lines()
-       .fold(0, |acc, l| {
-            let (f, s) = l.split_at(l.len() / 2);
-            let z: HashSet<char> = f.chars().collect();
-            let t: HashSet<char> = s.chars().collect();
-            let i = z.intersection(&t);
-            i.take(1).fold(0, |_, c| {
-                let n = if c.is_ascii_lowercase() {
-                    (*c as usize) - 96
-                } else {
-                    (*c as usize) - 38
-                };
-                return acc + n
-            })
+    inp.lines().fold(0, |acc, l| {
+        let (f, s) = l.split_at(l.len() / 2);
+        let z: HashSet<char> = f.chars().collect();
+        let t: HashSet<char> = s.chars().collect();
+        let i = z.intersection(&t);
+        i.take(1).fold(0, |_, c| {
+            let n = if c.is_ascii_lowercase() {
+                (*c as usize) - 96
+            } else {
+                (*c as usize) - 38
+            };
+            return acc + n;
+        })
     })
 }
 
@@ -50,7 +49,7 @@ fn three(inp: &str) -> usize {
                 total += x;
                 count = 0;
             }
-            _ => ()
+            _ => (),
         }
     }
     total
