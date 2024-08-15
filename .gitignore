@@ -2,5 +2,6 @@
 *.png
 __pycache__/
 input
-cookie.json
+cookie*
 **/target/**
+result
