@@ -22,7 +22,7 @@ fn get_priority(inp: &str) -> usize {
             } else {
                 (*c as usize) - 38
             };
-            return acc + n;
+            acc + n
         })
     })
 }
