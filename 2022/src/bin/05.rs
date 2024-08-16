@@ -8,7 +8,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 }
 
 struct Cr {
-    name: &str
+    name: &str,
 }
 
 #[cfg(test)]
@@ -33,6 +33,5 @@ move 1 from 1 to 2
     }
 
     #[test]
-    fn example_2() {
-    }
+    fn example_2() {}
 }
