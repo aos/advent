@@ -14,7 +14,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 }
 
 fn fully_contained(inp: &str) -> bool {
-    let (first_range, second_range) = inp.split_once(",").expect("should always work");
+    let (first_range, second_range) = inp.split_once(',').expect("should always work");
     let (f1, f2) = get_range(first_range);
     let (s1, s2) = get_range(second_range);
     let set1: HashSet<isize> = HashSet::from_iter(f1..=f2);
@@ -24,7 +24,7 @@ fn fully_contained(inp: &str) -> bool {
 }
 
 fn overlapping(inp: &str) -> bool {
-    let (first_range, second_range) = inp.split_once(",").expect("should always work");
+    let (first_range, second_range) = inp.split_once(',').expect("should always work");
     let (f1, f2) = get_range(first_range);
     let (s1, s2) = get_range(second_range);
 
@@ -35,7 +35,7 @@ fn overlapping(inp: &str) -> bool {
 }
 
 fn get_range(inp: &str) -> (isize, isize) {
-    let (first, second) = inp.split_once("-").expect("should work");
+    let (first, second) = inp.split_once('-').expect("should work");
     (
         first.parse::<isize>().expect("first"),
         second.parse::<isize>().expect("second"),
