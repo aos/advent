@@ -17,39 +17,18 @@ defmodule Aoc2023.Day04 do
   end
 
   def part2(input) do
-    winning_hands =
-      input
-      |> parse_input()
-      |> Enum.reject(fn x -> String.contains?(x, "Card") end)
-      |> Enum.map(&map_card_size/1)
-
-    starting_copies =
-      winning_hands
-      |> Enum.with_index()
-      |> Map.new(fn {_w, i} -> {i, 1} end)
-
-    # [ 4, 2, 2, 1, 0, 0 ]
-    # %{ 0 => 1, 1 => 1, ... }
-    winning_hands
+    input
+    |> parse_input()
+    |> Enum.reject(fn x -> String.contains?(x, "Card") end)
+    |> Enum.map(&map_card_size/1)
     |> Enum.with_index()
-    |> Enum.reduce(
-      starting_copies,
-      fn {w, i}, acc ->
-        num = Map.fetch!(acc, i)
-
-        if w > 0 do
-          Enum.each((i + 1)..(i + w - 1), fn s ->
-            Map.update!(acc, s, fn existing -> num + existing end)
-            acc
-          end)
-        end
-
-        acc
-      end
-    )
+    |> Map.new(fn {w, i} -> {i, w} end)
   end
 
-  def map_card_size(card) do
+  defp run_game(input, all_cards, current, max) do
+  end
+
+  defp map_card_size(card) do
     card
     |> String.split(" | ")
     |> Enum.map(fn s -> String.split(s) |> MapSet.new() end)
@@ -61,13 +40,7 @@ defmodule Aoc2023.Day04 do
     |> Enum.sum()
   end
 
-  def process_card(card) do
-    if card == 0 do
-    else
-    end
-  end
-
-  def parse_input(input) do
+  defp parse_input(input) do
     input
     |> String.split("\n", trim: true)
     |> Enum.flat_map(&String.split(&1, ": ", trim: true))
