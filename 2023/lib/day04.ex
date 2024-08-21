@@ -25,8 +25,8 @@ defmodule Aoc2023.Day04 do
     |> Map.new(fn {w, i} -> {i, w} end)
   end
 
-  defp run_game(input, all_cards, current, max) do
-  end
+  # defp run_game(_input, _all_cards, _current, _max) do
+  # end
 
   defp map_card_size(card) do
     card
