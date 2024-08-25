@@ -12,6 +12,7 @@ defmodule Aoc2023.Day05 do
       dictionary.seeds
       |> Enum.chunk_every(2)
       |> Enum.map(fn [f, s] -> f..(f + s) end)
+      |> IO.inspect(label: "SEED RANGE")
       |> Enum.flat_map(&Range.to_list/1)
     find_min_location(dictionary, seeds)
   end
