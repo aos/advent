@@ -48,28 +48,37 @@ impl Grid {
         (idx / self.dim.1, idx % self.dim.1)
     }
 
-    fn max_each_row(&self) -> Vec<u32> {
+    // position of max item on each row
+    fn max_each_row(&self) -> Vec<usize> {
         self.pos
             .chunks(self.dim.1)
-            .map(|chunk| *chunk.iter().max().unwrap_or(&0))
+            .enumerate()
+            .map(|(idx, chunk)| {
+                chunk
+                    .iter()
+                    .enumerate()
+                    .max_by_key(|(_idx, x)| **x).unwrap()
+                    .0 + (idx * self.dim.1)
+            })
             .collect()
     }
 
-    fn max_each_col(&self) -> Vec<u32> {
+    fn max_each_col(&self) -> Vec<usize> {
         (0..self.dim.1)
             .map(|col| {
                 self.pos
                     .iter()
                     .skip(col)
                     .step_by(self.dim.1)
-                    .max()
-                    .unwrap_or(&0)
+                    .enumerate()
+                    .max_by_key(|(_idx, x)| **x).unwrap()
                     .clone()
+                    .0 * self.dim.1 + col
             })
-            .collect::<Vec<_>>()
+            .collect()
     }
 
-    fn visible_trees(&self) -> usize {
+    fn _visible_trees(&self) -> usize {
         let mut total = (self.dim.0 * 2) + (self.dim.1 * 2) - 4;
         let max_row = self.max_each_row();
         let max_col = self.max_each_col();
@@ -80,6 +89,7 @@ impl Grid {
             if col == 0 || col == self.dim.1 {
                 acc
             } else {
+                acc
             }
         })
     }
