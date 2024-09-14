@@ -6,6 +6,7 @@ fn main() -> io::Result<()> {
     let grid = parse_input(&f);
 
     println!("part 1: {}", part1(&grid));
+    println!("part 2: {}", part2(&grid));
 
     Ok(())
 }
@@ -16,6 +17,15 @@ fn part1(grid: &Grid) -> usize {
         .enumerate()
         .filter(|(idx, _)| grid.check_edges(*idx))
         .count()
+}
+
+fn part2(grid: &Grid) -> usize {
+    grid.pos
+        .iter()
+        .enumerate()
+        .map(|(idx, _)| grid.scenic_score(idx))
+        .max()
+        .unwrap_or(0)
 }
 
 fn parse_input(inp: &str) -> Grid {
@@ -72,13 +82,17 @@ impl Grid {
 
         let me = self.pos[current_pos];
 
+        // Go from right to left
         let left = (range_row_start..current_pos)
+            .rev()
             .map(|p| self.pos[p])
             .all(|v| me > v);
         let right = (current_pos + 1..=range_row_end)
             .map(|p| self.pos[p])
             .all(|v| me > v);
-        let up = (col_two_d..current_pos)
+        // Go from down to up
+        let up = (col_two_d..=current_pos - self.dim.1)
+            .rev()
             .step_by(self.dim.1)
             .map(|p| self.pos[p])
             .all(|v| me > v);
@@ -88,6 +102,60 @@ impl Grid {
             .all(|v| me > v);
 
         left || right || up || down
+    }
+
+    fn count_trees(&self, through: impl Iterator<Item = u32>, val: u32) -> usize {
+        let mut total = 0;
+        for p in through {
+            if val > p {
+                total += 1;
+            } else {
+                total += 1;
+                break;
+            }
+        }
+
+        total
+    }
+
+    fn scenic_score(&self, current_pos: usize) -> usize {
+        let (row_two_d, col_two_d) = self.pos_2d(current_pos);
+        if row_two_d == 0
+            || col_two_d == 0
+            || row_two_d == (self.dim.0 - 1)
+            || col_two_d == (self.dim.1 - 1)
+        {
+            return 0;
+        }
+
+        let range_row_start = row_two_d * self.dim.1;
+        let range_row_end = (row_two_d * self.dim.1) + self.dim.1 - 1;
+        let range_col_end = (self.dim.0 - 1) * self.dim.1 + col_two_d;
+
+        let me = self.pos[current_pos];
+
+        // Go from right to left
+        let left = self.count_trees(
+            (range_row_start..current_pos).rev().map(|p| self.pos[p]),
+            me,
+        );
+        let right = self.count_trees((current_pos + 1..=range_row_end).map(|p| self.pos[p]), me);
+        // Go from down to up
+        let up = self.count_trees(
+            (col_two_d..=current_pos - self.dim.1)
+                .rev()
+                .step_by(self.dim.1)
+                .map(|p| self.pos[p]),
+            me,
+        );
+        let down = self.count_trees(
+            (current_pos + self.dim.1..=range_col_end)
+                .step_by(self.dim.1)
+                .map(|p| self.pos[p]),
+            me,
+        );
+
+        left * right * up * down
     }
 
     fn max_each_row(&self) -> Vec<usize> {
@@ -137,12 +205,14 @@ mod tests {
     #[test]
     fn example_1() {
         let grid = parse_input(EX);
-        let total = grid
-            .pos
-            .iter()
-            .enumerate()
-            .filter(|(idx, _)| grid.check_edges(*idx))
-            .count();
+        let total = part1(&grid);
         assert_eq!(total, 21);
+    }
+
+    #[test]
+    fn example_2() {
+        let grid = parse_input(EX);
+        let total = part2(&grid);
+        assert_eq!(total, 8);
     }
 }
